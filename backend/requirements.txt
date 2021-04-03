@@ -1,3 +1,4 @@
 bottle==0.12.19
 bottle_sqlite==0.2.0
 mgz==1.4.15
+python-dotenv==0.17.0

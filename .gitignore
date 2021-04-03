@@ -1,9 +1,9 @@
 .idea/
 
-/backend/files/
+/backend/database/
 /frontend/dist/
 
-*.db
+
 .env
 *.env.*
 !.env*.template

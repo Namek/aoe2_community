@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 import json
 import random
 
@@ -7,7 +8,12 @@ from bottle_sqlite import SQLitePlugin
 import datetime
 import os
 
-RECORDINGS_FOLDER = './files'
+
+load_dotenv()
+RECORDINGS_PATH = os.getenv('RECORDINGS_PATH') or './database/files'
+ENABLE_LOCAL_CORS = bool(os.getenv('ENABLE_LOCAL_CORS'))
+STATICS_PATH = os.getenv('STATICS_PATH') or './static'
+DB_PATH = './database/app.db'
 
 
 class EnableCors(object):
@@ -29,13 +35,16 @@ class EnableCors(object):
 
 
 app = Bottle()
-app.install(SQLitePlugin(dbfile='database.db', autocommit=False))
-app.install(EnableCors())
+app.install(SQLitePlugin(dbfile=DB_PATH, autocommit=False))
+
+if ENABLE_LOCAL_CORS:
+    app.install(EnableCors())
 
 try:
-    os.mkdir(RECORDINGS_FOLDER)
+    os.mkdir(RECORDINGS_PATH)
 except:
     pass
+
 
 def get_match_info(data):
     s = Summary(data)
@@ -51,7 +60,8 @@ def get_match_info(data):
         profile_ids=s.get_profile_ids()
     )
 
-def _copy_file(file, fp, chunk_size=2**16):
+
+def _copy_file(file, fp, chunk_size=2 ** 16):
     file.seek(0)
     read, write, offset = file.read, fp.write, file.tell()
     while 1:
@@ -59,6 +69,7 @@ def _copy_file(file, fp, chunk_size=2**16):
         if not buf: break
         write(buf)
     file.seek(offset)
+
 
 @app.route('/api/match', method='POST')
 def post_match(db):
@@ -85,9 +96,10 @@ def post_match(db):
 
     recordings = [(file, get_match_info(file.file), recording_times[idx]) for idx, file in enumerate(recording_files)]
     recordings.sort(key=lambda r: r[2])
-    res = db.execute("INSERT INTO matches ('group', 'civ_draft', 'date', 'best_of', 'p0_maps', 'p1_maps', 'p0_name', 'p1_name',"
-                     " 'p0_map_ban', 'p1_map_ban', 'upload_user_id') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-                     [group, civ_draft, date, best_of, p0_maps, p1_maps, p0_name, p1_name, p0_map_ban, p1_map_ban, user_id])
+    res = db.execute(
+        "INSERT INTO matches ('group', 'civ_draft', 'date', 'best_of', 'p0_maps', 'p1_maps', 'p0_name', 'p1_name',"
+        " 'p0_map_ban', 'p1_map_ban', 'upload_user_id') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+        [group, civ_draft, date, best_of, p0_maps, p1_maps, p0_name, p1_name, p0_map_ban, p1_map_ban, user_id])
 
     match_id = res.lastrowid
 
@@ -101,10 +113,13 @@ def post_match(db):
         teams = match_info['teams']
         team_count = len(teams)
 
-        res = db.execute("INSERT INTO recordings ('filename', 'original_filename', 'mod_time', 'map_name', 'completed', 'game_version', 'game_map_type', 'team_count') VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                         [new_filename, file.filename, mod_time, match_info['map_name'], completed, game_version, game_map_type, team_count])
+        res = db.execute(
+            "INSERT INTO recordings ('filename', 'original_filename', 'mod_time', 'map_name', 'completed', 'game_version', 'game_map_type', 'team_count') VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [new_filename, file.filename, mod_time, match_info['map_name'], completed, game_version, game_map_type,
+             team_count])
         recording_id = res.lastrowid
-        db.execute("INSERT INTO matches_recordings ('match_id', 'recording_id') VALUES (?, ?)", [match_id, recording_id])
+        db.execute("INSERT INTO matches_recordings ('match_id', 'recording_id') VALUES (?, ?)",
+                   [match_id, recording_id])
 
         players = match_info['players']
         for pi, player in enumerate(players):
@@ -115,9 +130,11 @@ def post_match(db):
                 if number in team:
                     team_index = ti
 
-            db.execute("INSERT INTO recordings_players ('recording_id', 'name', 'civ', 'team_index', 'profile_id') VALUES (?, ?, ?, ?, ?)", [recording_id, player['name'], player['civilization'], team_index, profile_id])
+            db.execute(
+                "INSERT INTO recordings_players ('recording_id', 'name', 'civ', 'team_index', 'profile_id') VALUES (?, ?, ?, ?, ?)",
+                [recording_id, player['name'], player['civilization'], team_index, profile_id])
 
-        with open('{}/{}'.format(RECORDINGS_FOLDER, new_filename), 'wb') as fp:
+        with open('{}/{}'.format(RECORDINGS_PATH, new_filename), 'wb') as fp:
             _copy_file(file.file, fp)
             saved_files.append(new_filename)
 
@@ -137,7 +154,9 @@ def get_matches(db):
         match.pop('upload_user_id')
         match['p0_maps'] = match['p0_maps'].split('||')
         match['p1_maps'] = match['p1_maps'].split('||')
-        rows = db.execute("SELECT game_version, recording_id as id FROM recordings JOIN matches_recordings ON recording_id=recordings.id WHERE match_id=?", [match['id']]).fetchall()
+        rows = db.execute(
+            "SELECT game_version, recording_id as id FROM recordings JOIN matches_recordings ON recording_id=recordings.id WHERE match_id=?",
+            [match['id']]).fetchall()
         match['recordings'] = [dict(r) for r in rows]
 
         # generate fake recordings
@@ -146,7 +165,7 @@ def get_matches(db):
         n = len(recs)
         while n < best_of:
             prev = recs[n - 1]
-            recs.append(dict(game_version=prev['game_version'], id=prev['id']+1))
+            recs.append(dict(game_version=prev['game_version'], id=prev['id'] + 1))
             n += 1
 
     response.set_header('Content-Type', 'application/json')
@@ -155,7 +174,8 @@ def get_matches(db):
 
 @app.route('/api/match/<match_id:int>/recording/<rec_id:int>', method='GET')
 def get_match_recording(match_id, rec_id, db):
-    match = dict(db.execute("SELECT `date`, p0_name, p1_name, best_of, `group` FROM matches WHERE id=?", [match_id]).fetchone())
+    match = dict(
+        db.execute("SELECT `date`, p0_name, p1_name, best_of, `group` FROM matches WHERE id=?", [match_id]).fetchone())
     match_date = datetime.datetime.fromtimestamp(match['date']).strftime('%Y-%m-%d')
     rows = db.execute("SELECT filename, completed, recording_id as id FROM recordings JOIN matches_recordings"
                       " ON matches_recordings.recording_id = recordings.id WHERE matches_recordings.match_id = ?",
@@ -175,10 +195,10 @@ def get_match_recording(match_id, rec_id, db):
         rec = random.choice(recordings)
         number = len(recordings) + (rec_id - last['id'])
 
-    download_filename = "{} {} - {} vs {} - {} BO{}.aoe2record"\
+    download_filename = "{} {} - {} vs {} - {} BO{}.aoe2record" \
         .format(match_date, number, match['p0_name'], match['p1_name'], match['group'], match['best_of'])
 
-    return static_file(rec['filename'], RECORDINGS_FOLDER, download=download_filename)
+    return static_file(rec['filename'], RECORDINGS_PATH, download=download_filename)
 
 
 @app.route('/gen_passwords/<count>')
@@ -192,8 +212,15 @@ def generate_passwords(count, db):
 
     return ",".join(generated)
 
-@app.route('/<filepath:path>')
-def hello(filepath, db):
-    return static_file(filepath, root='./static')
+
+@app.route('/')
+def index(db):
+    return static_file('index.html', root=STATICS_PATH)
+
+
+@app.route('/<fpath:path>')
+def hello(fpath, db):
+    return static_file(fpath, root=STATICS_PATH)
+
 
 run(app, host='0.0.0.0', port=8080)
