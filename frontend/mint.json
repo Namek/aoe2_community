@@ -1,0 +1,20 @@
+{
+  "name": "aoe2",
+  "application": {
+    "head": "assets/head.html",
+    "title": "aoe2",
+    "icon": "assets/favicon.png"
+  },
+  "external": {
+    "stylesheets": [
+      "assets/bulma.css",
+      "assets/style.css"
+    ]
+  },
+  "source-directories": [
+    "source"
+  ],
+  "test-directories": [
+    "tests"
+  ]
+}

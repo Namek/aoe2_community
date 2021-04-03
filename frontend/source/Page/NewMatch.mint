@@ -1,0 +1,470 @@
+component Page.NewMatch {
+  const GROUPS = ["Gold", "Red", "Black", "Blue", "Green"]
+
+  const MAPS_BO5 =
+    [
+      "Socotra",
+      "HC4 - Bay",
+      "HC4 - Gold Rush",
+      "HC4 - Islands",
+      "RBW3 - Kawasan",
+      "RBW3 - Lowland",
+      "RBW3 - Sacred Springs",
+      "RBW3 - Haboob"
+    ]
+
+  const MAPS_BO3 =
+    [
+      "Atacama",
+      "Socotra",
+      "Arena",
+      "Four Lakes",
+      "HC4 - Gold Rush"
+    ]
+
+  state selectedGroup = ""
+  state maxRecordingsAmount = 3
+  state collectedRecordingFiles : Map(Number, File) = Map.empty()
+  state isFormValid = false
+  state wasFormSubmitted = false
+  state invalidFields : Array(String) = []
+
+  fun componentDidMount {
+    void
+  }
+
+  fun maximumGamesAmount (group : String) {
+    case (group) {
+      "Red" => 5
+      "Gold" => 5
+      => 3
+    }
+  }
+
+  get minimumRecordingsAmount {
+    (maximumGamesAmount(selectedGroup) + 1) / 2
+  }
+
+  get minimumMapsPickedByPlayer {
+    /* minus one, because without Arabia */
+    (maximumGamesAmount(selectedGroup) / 2) - 1
+  }
+
+  get maps {
+    case (maximumGamesAmount(selectedGroup)) {
+      5 => MAPS_BO5
+      => MAPS_BO3
+    }
+  }
+
+  fun moreRecordings (evt : Html.Event) {
+    sequence {
+      next { maxRecordingsAmount = maxRecordingsAmount + 1 }
+    }
+  }
+
+  fun onGroupSelect (evt : Html.Event) {
+    try {
+      group =
+        `#{evt.target}.value`
+
+      next
+        {
+          selectedGroup = group,
+          maxRecordingsAmount = maximumGamesAmount(group)
+        }
+    }
+  }
+
+  fun onSetRecordingFile (index : Number, evt : Html.Event) {
+    try {
+      files =
+        `#{evt.target}.files` as Array(File)
+
+      file =
+        files[0]
+        |> Debug.log
+
+      next
+        {
+          collectedRecordingFiles =
+            case (file) {
+              Maybe::Just f =>
+                Map.set(index, f, collectedRecordingFiles)
+
+              Maybe::Nothing => Map.delete(index, collectedRecordingFiles)
+            }
+        }
+    }
+  }
+
+  fun validateForm {
+    next
+      {
+        invalidFields = Debug.log(validateFormData(`new FormData(document.forms[0])`)),
+        isFormValid = Array.isEmpty(invalidFields)
+      }
+  }
+
+  fun validateFormData (formData : FormData) {
+    try {
+      values =
+        `(() => {
+          const map = new Map()
+          for (const [key, val] of #{formData}) {
+            const isCorrectValue = typeof val == 'object' ? val.size > 0 : !!val
+
+            if (key.endsWith("[]")) {
+              map[key] = [...(map[key] || []), ...(isCorrectValue ? [val] : [])]
+            }
+            else {
+              map[key] = isCorrectValue ? val : null
+            }
+          }
+          return map
+        })()
+        `
+
+      invalidFields =
+        `(() => {
+          const invalidFields = []
+          for (const key in #{values}) {
+            const val = #{values}[key]
+            let isInvalid = val === null
+
+            if (!isInvalid) {
+              if (key === "recording_files[]") {
+                isInvalid = val.length < #{minimumRecordingsAmount}
+              } else if (key === "p0_maps[]" || key === "p1_maps[]") {
+                isInvalid = val.length < #{minimumMapsPickedByPlayer}
+              } else if (key === "civ_draft") {
+                isInvalid = !/^(https:\/\/aoe2cm.net\/draft\/)?[A-Za-z0-9]{5}$/.test(val)
+              }
+            }
+
+            if (isInvalid) {
+              invalidFields.push(key)
+            }
+          }
+
+          return invalidFields
+        })()
+        ` as Array(String)
+
+      invalidFields
+    }
+  }
+
+  fun onFormChange (evt : Html.Event) {
+    sequence {
+      `#{evt.event}.preventDefault()`
+      validateForm()
+    }
+  }
+
+  fun onSubmit (evt : Html.Event) {
+    sequence {
+      `#{evt.event}.preventDefault()`
+
+      App.setLoading(true)
+
+      case (matchForm) {
+        Maybe::Just form =>
+          try {
+            formData =
+              (`new FormData(document.forms[0])`)
+
+            invalidFields =
+              validateFormData(formData)
+
+            isFormValid =
+              Array.isEmpty(invalidFields)
+
+            next
+              {
+                invalidFields = invalidFields,
+                isFormValid = isFormValid,
+                wasFormSubmitted = true
+              }
+
+            if (!isFormValid) {
+              `alert('Błąd: braki w formularzu!')`
+            } else {
+              sequence {
+                files =
+                  (`#{formData}.getAll('recording_files[]')` as Array(File))
+                  |> Array.select((f : File) { File.size(f) > 0 })
+
+                bestOf =
+                  maximumGamesAmount(selectedGroup)
+
+                `(() => {
+                  for (const file of #{files}) {
+                    #{formData}.append("recording_times[]", file.lastModified)
+                  }
+
+                  #{formData}.set('best_of', #{bestOf})
+                })()`
+
+                response =
+                  Http.post("#{@ENDPOINT}/api/match")
+                  |> Http.formDataBody(formData)
+                  |> Http.send()
+
+                Debug.log(response)
+
+                `alert('Mecz zapisany, dzięki!')`
+
+                `#{form}.reset()`
+
+                App.setMainTab(MainTab::Matches)
+              } catch Http.ErrorResponse => error {
+                `alert(Object.keys(#{error}))`
+              }
+            }
+          }
+
+        Maybe::Nothing => void
+      }
+
+      App.setLoading(false)
+    }
+  }
+
+  fun markFieldError (fieldName : String) {
+    wasFormSubmitted && Array.contains(fieldName, invalidFields)
+  }
+
+  fun render : Html {
+    <form::main as matchForm onChange={onFormChange}>
+      <h2 class="subtitle">
+        "Wrzuć nagrania z meczu"
+      </h2>
+
+      <div class="columns">
+        <div class="column">
+          <div class="field">
+            <label class="label">
+              "Grupa"
+            </label>
+
+            <div class="control">
+              <select
+                type="text"
+                class="input #{Utils.whenStr(markFieldError("group"), "is-danger")}"
+                name="group"
+                onChange={onGroupSelect}
+                value={selectedGroup}>
+
+                <option>"-- Grupa (poziom) --"</option>
+
+                for (opt of GROUPS) {
+                  <option value={opt}>
+                    "#{opt} (BO#{maximumGamesAmount(opt)})"
+                  </option>
+                }
+
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">
+              "Civ Draft: link lub kod"
+            </label>
+
+            <div class="control">
+              <input
+                class="input #{Utils.whenStr(markFieldError("civ_draft"), "is-danger")}"
+                type="text"
+                name="civ_draft"
+                required="true"
+                placeholder="np. WXfmK lub https://aoe2cm.net/draft/WXfmK"/>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">
+              "Data"
+
+              <div class="control">
+                <input
+                  type="date"
+                  class="input #{Utils.whenStr(markFieldError("group"), "is-danger")}"
+                  name="date"/>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="columns">
+            <{ renderPlayer(0, "Gracz A (Ty)") }>
+            <{ renderPlayer(1, "Gracz B (przeciwnik)") }>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="field">
+          <label class="label">
+            "Pliki nagrań (minimum #{minimumRecordingsAmount})"
+          </label>
+
+          <p>"Jeśli gra została przerwana i musieliście ją kontynuować przy użyciu funkcji \"Restore\" to wrzuć zarówno kawałek nagrania przed przerwą jak i po."</p>
+
+          <div class="column">
+            for (i of Array.range(0, maxRecordingsAmount - 1)) {
+              try {
+                filename =
+                  Map.get(i, collectedRecordingFiles)
+                  |> Maybe.map((file : File) { File.name(file) })
+
+                <div
+                  class={
+                    "file has-name is-fullwidth
+                    #{Utils.whenStr(filename != Maybe::Nothing, "is-primary")}
+                    #{Utils.whenStr(markFieldError("recording_files[]"), "is-danger")}"
+                  }
+                  key={Number.toString(i)}>
+
+                  <label class="file-label">
+                    <input
+                      class="file-input"
+                      type="file"
+                      accept=".aoe2record"
+                      name="recording_files[]"
+                      onChange={onSetRecordingFile(i)}/>
+
+                    <span class="file-cta">
+                      <span class="file-icon">
+                        <i class="fas fa-upload"/>
+                      </span>
+
+                      <span class="file-label">
+                        "Wybierz plik…"
+                      </span>
+                    </span>
+
+                    <span class="file-name">
+                      <{ filename or "Nagranie #{i + 1}" }>
+                    </span>
+                  </label>
+
+                </div>
+              }
+            }
+
+            <button
+              class="button is-small is-info"
+              type="button"
+              onClick={moreRecordings}>
+
+              "+"
+
+            </button>
+          </div>
+        </div>
+
+        <hr/>
+
+        <div class="field has-addons is-justify-content-flex-end">
+          <div class="control">
+            <input
+              type="password"
+              class="input #{Utils.whenStr(markFieldError("password"), "is-danger")}"
+              name="password"
+              placeholder="Twoje prywatne hasło"/>
+          </div>
+
+          <div class="control">
+            <button
+              type="submit"
+              class="button is-primary"
+              onClick={onSubmit}>
+
+              "Wyślij"
+
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  }
+
+  fun renderPlayer (playerIndex : Number, label : String) : Html {
+    <div class="column">
+      <div class="field">
+        <label class="label">
+          <{ label }>
+        </label>
+
+        <div class="control has-icons-left">
+          try {
+            name =
+              "p#{playerIndex}_name"
+
+            <input
+              type="text"
+              class="input #{Utils.whenStr(markFieldError(name), "is-danger")}"
+              name={name}
+              placeholder="ksywa"/>
+          }
+
+          <span class="icon is-small is-left">
+            <i class="fas fa-user"/>
+          </span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="control">
+          try {
+            name =
+              "p#{playerIndex}_map_ban"
+
+            <div class="select is-fullwidth #{Utils.whenStr(markFieldError(name), "is-danger")}">
+              <select name={name}>
+                <option>"-- Ban Mapy --"</option>
+
+                for (map of maps) {
+                  <option value={map}>
+                    "#{map}"
+                  </option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+      </div>
+
+      for (i of Array.range(1, minimumMapsPickedByPlayer + 1)) {
+        <div class="field">
+          <div class="control">
+            try {
+              name =
+                "p#{playerIndex}_maps[]"
+
+              <div class="select is-fullwidth #{Utils.whenStr(markFieldError(name), "is-danger")}">
+                <select name={name}>
+                  <option>"-- Mapa #{i + 1}. --"</option>
+
+                  for (map of maps) {
+                    <option value={map}>
+                      "#{map}"
+                    </option>
+                  }
+                </select>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  style main {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+}

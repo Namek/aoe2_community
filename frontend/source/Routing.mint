@@ -1,0 +1,5 @@
+routes {
+  / {
+    Calendar.init()
+  }
+}

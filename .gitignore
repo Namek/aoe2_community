@@ -1,0 +1,18 @@
+.idea/
+
+/backend/files/
+/frontend/dist/
+
+*.db
+.env
+*.env.*
+!.env*.template
+
+# Python
+venv/
+*.py[cod]
+Bin/
+Lib/
+Scripts/
+pyvenv.cfg
+.venv
