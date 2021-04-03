@@ -1,6 +1,8 @@
 .idea/
 
-/backend/database/
+/backend/database/*.db
+!/backend/database/app.template.db
+/backend/database/files/
 /frontend/dist/
 
 

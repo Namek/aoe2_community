@@ -16,7 +16,8 @@ WORKDIR /app
 COPY backend/requirements.txt .
 RUN pip install -r requirements.txt --no-cache-dir
 COPY --from=build-frontend /app/dist ./static
-COPY backend/database/app.db ./database/
+COPY backend/database/app.template.db ./database/
+RUN false | cp -i ./database/app.template.db ./database/app.db
 COPY backend/main.py .
 
 EXPOSE 8080
