@@ -1,7 +1,7 @@
 component Page.NewMatch {
   const GROUPS = ["Gold", "Red", "Black", "Blue", "Green"]
 
-  const MAPS_BO5 =
+  const MAPS_GOLD_RED =
     [
       "Socotra",
       "HC4 - Bay",
@@ -13,7 +13,16 @@ component Page.NewMatch {
       "RBW3 - Haboob"
     ]
 
-  const MAPS_BO3 =
+  const MAPS_BLACK_BLUE =
+    [
+      "Socotra",
+      "HC4 - Gold Rush",
+      "RBW3 - Haboob",
+      "RBW3 - Lowland",
+      "RBW3 - Kawasan"
+    ]
+
+  const MAPS_GREEN =
     [
       "Atacama",
       "Socotra",
@@ -51,9 +60,13 @@ component Page.NewMatch {
   }
 
   get maps {
-    case (maximumGamesAmount(selectedGroup)) {
-      5 => MAPS_BO5
-      => MAPS_BO3
+    case (selectedGroup) {
+      "Gold" => MAPS_GOLD_RED
+      "Red" => MAPS_GOLD_RED
+      "Black" => MAPS_BLACK_BLUE
+      "Blue" => MAPS_BLACK_BLUE
+      "Green" => MAPS_GREEN
+      => []
     }
   }
 
@@ -430,7 +443,10 @@ component Page.NewMatch {
               "p#{playerIndex}_map_ban"
 
             <div class="select is-fullwidth #{Utils.whenStr(markFieldError(name), "is-danger")}">
-              <select name={name}>
+              <select
+                name={name}
+                disabled={Array.isEmpty(maps)}>
+
                 <option>"-- Ban Mapy --"</option>
 
                 for (map of maps) {
@@ -438,6 +454,7 @@ component Page.NewMatch {
                     "#{map}"
                   </option>
                 }
+
               </select>
             </div>
           }
@@ -452,7 +469,10 @@ component Page.NewMatch {
                 "p#{playerIndex}_maps[]"
 
               <div class="select is-fullwidth #{Utils.whenStr(markFieldError(name), "is-danger")}">
-                <select name={name}>
+                <select
+                  name={name}
+                  disabled={Array.isEmpty(maps)}>
+
                   <option>"-- Mapa #{i + 1}. --"</option>
 
                   for (map of maps) {
@@ -460,6 +480,7 @@ component Page.NewMatch {
                       "#{map}"
                     </option>
                   }
+
                 </select>
               </div>
             }
