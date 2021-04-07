@@ -18,7 +18,7 @@ RUN pip install -r requirements.txt --no-cache-dir
 COPY --from=build-frontend /app/dist ./static
 COPY backend/database/app.template.db ./database/
 RUN false | cp -i ./database/app.template.db ./database/app.db
-COPY backend/main.py .
+COPY backend/*.py .
 
 EXPOSE 8080
 STOPSIGNAL SIGTERM

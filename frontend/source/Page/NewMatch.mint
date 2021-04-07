@@ -213,13 +213,19 @@ component Page.NewMatch {
 
                 Debug.log(response)
 
-                `alert('Mecz zapisany, dzięki!')`
+                if (response.status == 200) {
+                  sequence {
+                    `alert('Mecz zapisany, dzięki!')`
 
-                `#{form}.reset()`
+                    `#{form}.reset()`
+                  }
+                } else {
+                  `alert("Błąd serwera: " + #{response}.status)`
+                }
 
                 App.setMainTab(MainTab::Matches)
               } catch Http.ErrorResponse => error {
-                `alert(Object.keys(#{error}))`
+                `alert(JSON.stringify(#{error}))`
               }
             }
           }

@@ -7,14 +7,35 @@ from bottle import Bottle, run, static_file, request, response
 from bottle_sqlite import SQLitePlugin
 import datetime
 import os
+from pathlib import Path
 
 
 load_dotenv()
 RECORDINGS_PATH = os.getenv('RECORDINGS_PATH') or './database/files'
 ENABLE_LOCAL_CORS = bool(os.getenv('ENABLE_LOCAL_CORS'))
 STATICS_PATH = os.getenv('STATICS_PATH') or './static'
-DB_PATH = './database/app.db'
+DB_TEMPLATE_PATH = os.getenv('DB_TEMPLATE_PATH') or './database/app.template.db'
+DB_PATH = os.getenv('DB_PATH') or './database/app.db'
 
+
+def _copy_file(source_file, dest_file, chunk_size=2 ** 16):
+    source_file.seek(0)
+    read, write, offset = source_file.read, dest_file.write, source_file.tell()
+    while 1:
+        buf = read(chunk_size)
+        if not buf: break
+        write(buf)
+    source_file.seek(offset)
+
+
+if not Path(DB_PATH).exists():
+    with open(DB_PATH, 'wb') as fp:
+        with open(DB_TEMPLATE_PATH, 'rb') as source:
+            _copy_file(source, fp)
+
+if not Path(DB_PATH).exists():
+    print("Database file '{}' does not exist!".format(DB_PATH))
+    exit(1)
 
 class EnableCors(object):
     name = 'enable_cors'
@@ -59,17 +80,6 @@ def get_match_info(data):
         platform=s.get_platform(),
         profile_ids=s.get_profile_ids()
     )
-
-
-def _copy_file(file, fp, chunk_size=2 ** 16):
-    file.seek(0)
-    read, write, offset = file.read, fp.write, file.tell()
-    while 1:
-        buf = read(chunk_size)
-        if not buf: break
-        write(buf)
-    file.seek(offset)
-
 
 @app.route('/api/match', method='POST')
 def post_match(db):
