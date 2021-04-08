@@ -64,11 +64,43 @@ record Recording {
   gameVersion : String using "game_version"
 }
 
+enum SortingMode {
+  DateDesc
+  DateAsc
+  Id
+}
+
 component Page.Matches {
   connect Matches exposing { matches }
 
+  state sortingMode = SortingMode::DateDesc
+
   fun componentDidMount {
     Matches.refreshList()
+  }
+
+  fun toggleSortMode {
+    next
+      {
+        sortingMode =
+          case (sortingMode) {
+            SortingMode::DateDesc => SortingMode::DateAsc
+            SortingMode::DateAsc => SortingMode::Id
+            SortingMode::Id => SortingMode::DateDesc
+          }
+      }
+  }
+
+  fun matchSortFn (m1 : Match, m2 : Match) {
+    case (sortingMode) {
+      SortingMode::Id => 0
+
+      SortingMode::DateAsc =>
+        m1.date - m2.date
+
+      SortingMode::DateDesc =>
+        m2.date - m1.date
+    }
   }
 
   fun render : Html {
@@ -83,7 +115,18 @@ component Page.Matches {
                 <table class="table is-hoverable is-narrow">
                   <thead>
                     <tr>
-                      <th>"Data"</th>
+                      <th onClick={toggleSortMode}>
+                        "Data "
+
+                        if (sortingMode == SortingMode::DateAsc) {
+                          "↓"
+                        }
+
+                        if (sortingMode == SortingMode::DateDesc) {
+                          "↑"
+                        }
+                      </th>
+
                       <th>"Grupa"</th>
                       <th>"Draft"</th>
                       <th>"Nagrania"</th>
@@ -91,7 +134,7 @@ component Page.Matches {
                   </thead>
 
                   <tbody>
-                    for (match of ms) {
+                    for (match of Array.sort(matchSortFn, ms)) {
                       <tr>
                         <td>"#{Utils.epochToDateString(match.date)}"</td>
                         <td>"#{match.group} (BO#{match.bestOf})"</td>
@@ -174,6 +217,10 @@ component Page.Matches {
 
     table {
       margin: 0 auto;
+
+      th {
+        user-select: none;
+      }
     }
   }
 
