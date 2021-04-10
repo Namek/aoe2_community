@@ -42,6 +42,39 @@ store Matches {
       }
     }
   }
+
+  fun deleteMatch (match : Match) {
+    sequence {
+      title =
+        "#{match.p0Name} vs #{match.p1Name}"
+
+      ret =
+        `window.confirm("Czy na pewno chcesz usunąć mecz #{title}?")` as Bool
+
+      if (ret) {
+        sequence {
+          App.setLoading(true)
+
+          /* |> Http.formDataBody(FormData.empty()) */
+          response =
+            "#{@ENDPOINT}/api/match/#{match.matchId}"
+            |> Http.delete()
+            |> Http.withCredentials(true)
+            |> Http.send()
+
+          refreshList()
+
+          void
+        } catch Http.ErrorResponse => error {
+          `alert("Sromotna klęska: " + JSON.stringify(#{error}))`
+        }
+      } else {
+        Promise.never()
+      }
+
+      App.setLoading(false)
+    }
+  }
 }
 
 record Match {
@@ -71,6 +104,7 @@ enum SortingMode {
 }
 
 component Page.Matches {
+  connect App exposing { loggedInUser }
   connect Matches exposing { matches }
 
   state sortingMode = SortingMode::DateDesc
@@ -130,6 +164,10 @@ component Page.Matches {
                       <th>"Grupa"</th>
                       <th>"Draft"</th>
                       <th>"Nagrania"</th>
+
+                      if (App.hasAdminRole) {
+                        <th/>
+                      }
                     </tr>
                   </thead>
 
@@ -155,6 +193,18 @@ component Page.Matches {
                             </>
                           }
                         </td>
+
+                        if (App.hasAdminRole) {
+                          <td>
+                            <button
+                              class="button is-danger is-small"
+                              onClick={() { Matches.deleteMatch(match) }}>
+
+                              <span>"Usuń mecz"</span>
+
+                            </button>
+                          </td>
+                        }
                       </tr>
                     }
                   </tbody>

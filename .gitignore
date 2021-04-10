@@ -3,6 +3,7 @@
 /backend/database/*.db
 !/backend/database/app.template.db
 /backend/database/files/
+/backend/database/sessions/
 /frontend/dist/
 
 

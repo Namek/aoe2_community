@@ -1,32 +1,25 @@
-store App {
-  state mainTab = if (@ENABLE_CALENDAR == "1") {
-    MainTab::Calendar
-  } else {
-    MainTab::Matches
-  }
+component Main {
+  connect App exposing { mainTab, modal }
 
-  state loading = false
-
-  fun setMainTab (tab : MainTab) {
-    next { mainTab = tab }
-  }
-
-  fun setLoading (enabled : Bool) {
+  fun closeModal {
     sequence {
-      Timer.nextFrame()
-      next { loading = enabled }
+      App.setModal(Modal::None)
     }
   }
-}
 
-enum MainTab {
-  Calendar
-  Matches
-  NewMatch
-}
+  fun logIn {
+    case (logInPasswordEl) {
+      Maybe::Just element =>
+        sequence {
+          password =
+            `#{element}.value`
 
-component Main {
-  connect App exposing { mainTab }
+          App.logIn(password)
+        }
+
+      => Promise.never()
+    }
+  }
 
   fun render : Html {
     <div::container>
@@ -47,7 +40,15 @@ component Main {
               class={Utils.whenStr(mainTab == MainTab::Matches, "is-active")}
               onClick={(evt : Html.Event) { App.setMainTab(MainTab::Matches) }}>
 
-              <a>"Mecze"</a>
+              <a>
+                <span class="icon is-small">
+                  <i
+                    class="fas fa-list"
+                    aria-hidden="true"/>
+                </span>
+
+                <span>"Mecze"</span>
+              </a>
 
             </li>
 
@@ -55,7 +56,15 @@ component Main {
               class={Utils.whenStr(mainTab == MainTab::NewMatch, "is-active")}
               onClick={(evt : Html.Event) { App.setMainTab(MainTab::NewMatch) }}>
 
-              <a>"Nowy mecz"</a>
+              <a>
+                <span class="icon is-small">
+                  <i
+                    class="fas fa-plus-circle"
+                    aria-hidden="true"/>
+                </span>
+
+                <span>"Nowy mecz"</span>
+              </a>
 
             </li>
           </ul>
@@ -72,6 +81,46 @@ component Main {
             <Page.NewMatch/>
         }
       </div>
+
+      case (modal) {
+        Modal::None => <></>
+
+        Modal::LogIn =>
+          <div class="modal is-active">
+            <div class="modal-background"/>
+
+            <div class="modal-card">
+              <header class="modal-card-head">
+                <p class="modal-card-title">
+                  "Panel admina"
+                </p>
+
+                <button
+                  class="delete"
+                  aria-label="close"
+                  onClick={closeModal}/>
+              </header>
+
+              <section class="modal-card-body">
+                <input as logInPasswordEl
+                  type="password"
+                  class="input"
+                  name="password"
+                  placeholder="Twoje prywatne hasło"/>
+              </section>
+
+              <footer class="modal-card-foot is-justify-content-flex-end">
+                <button
+                  class="button is-success"
+                  onClick={logIn}>
+
+                  "Zaloguj"
+
+                </button>
+              </footer>
+            </div>
+          </div>
+      }
 
       if (App.loading) {
         <div::spinner>
