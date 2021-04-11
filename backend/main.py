@@ -10,7 +10,7 @@ import os
 
 from beaker.middleware import SessionMiddleware
 import bottle
-from bottle import abort, run, static_file, request, response, route
+from bottle import abort, error, run, static_file, request, response, route
 from bottle_sqlite import SQLitePlugin
 from mgz.summary import Summary
 
@@ -310,6 +310,11 @@ def index(db):
 @route('/<fpath:path>')
 def hello(fpath, db):
     return static_file(fpath, root=STATICS_PATH)
+
+
+@error(404)
+def not_found(db):
+    return index(db)
 
 
 session_opts = {
