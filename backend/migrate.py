@@ -57,9 +57,12 @@ def migrate(db_path):
                 if Path(filepath).exists():
                     print(f'Updating recording: {filepath}')
                     with open(filepath, 'rb') as file:
-                        m = utils.get_match_info(file)
-                        c.execute('UPDATE recordings SET start_time_seconds=? WHERE id=?', [m['start_time_seconds'], rid])
-                        c.execute('UPDATE recordings SET duration_seconds=? WHERE id=?', [m['duration_seconds'], rid])
+                        try:
+                            m = utils.get_match_info(file)
+                            c.execute('UPDATE recordings SET start_time_seconds=? WHERE id=?', [m['start_time_seconds'], rid])
+                            c.execute('UPDATE recordings SET duration_seconds=? WHERE id=?', [m['duration_seconds'], rid])
+                        except RuntimeError:
+                            print(f"Couldn't process {filename}")
             print('Times updated.')
         if start_version != version:
             c.execute('DELETE FROM migration')
