@@ -29,8 +29,8 @@ def run_website():
 
 
 def run_discord_bot():
-    # import discord_bot
-    pass
+    if cfg.ENABLE_DISCORD_BOT:
+        import discord_bot
 
 
 if __name__ == "__main__":

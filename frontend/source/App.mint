@@ -130,3 +130,7 @@ record LoggedInUser {
   id : Number,
   roles : Number
 }
+
+record ServerError {
+  error : String
+}

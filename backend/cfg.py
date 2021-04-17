@@ -16,6 +16,7 @@ SESSIONS_DATA_DIR = os.getenv('SESSIONS_PATH') or './database/sessions/data'
 SESSIONS_LOCK_DIR = os.getenv('SESSIONS_PATH') or './database/sessions/lock'
 SESSION_SECRET = os.getenv('SESSION_SECRET') or ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(30))
 
+ENABLE_DISCORD_BOT = bool(os.getenv('ENABLE_DISCORD_BOT') or True)
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
-DISCORD_SERVER_ID = int(os.getenv('DISCORD_SERVER_ID'))
+DISCORD_SERVER_ID = int(os.getenv('DISCORD_SERVER_ID') or 0)
 DISCORD_SERVER_CHANNEL_NAMES = (os.getenv('DISCORD_SERVER_CHANNEL_NAMES') or '').split(',')

@@ -6,9 +6,8 @@ import types
 
 from beaker.middleware import SessionMiddleware
 import bottle
-from bottle import abort, error, run, static_file, request, response, route
+from bottle import abort, run, static_file, request, response, route
 from bottle_sqlite import SQLitePlugin
-from mgz.summary import Summary
 
 import cfg
 import utils
@@ -37,19 +36,26 @@ if cfg.CORS_ALLOW_ORIGIN:
     app.default_error_handler = types.MethodType(error_handler, app)
 
 
+def error(msg):
+    response.status = 200
+    response.set_header('Content-Type', 'application/json')
+    return json.dumps(dict(error=msg))
+
+
 def get_match_info(data):
-    s = Summary(data)
+    from mgz.model import parse_match
+
+    m = parse_match(data)
 
     return dict(
-        map_name=s.get_map()['name'],
-        game_version=s.get_version(),
-        match_settings=s.get_settings(),
-        players=s.get_players(),
-        teams=s.get_teams(),
-        completed=s.get_completed(),
-        platform=s.get_platform(),
-        profile_ids=s.get_profile_ids()
+        map_name=m.map.name,
+        game_version=m.version,
+        game_map_type=m.type,
+        players=m.players,
+        teams=m.teams,
+        completed=False,
     )
+
 
 @route('/api/auth/check', method='POST')
 def auth_check(db):
@@ -64,6 +70,7 @@ def auth_check(db):
 
     response.set_header('Content-Type', 'application/json')
     return dict(id=user['id'], roles=user['roles'])
+
 
 @route('/api/auth', method='POST')
 def auth_log_in(db):
@@ -123,8 +130,8 @@ def post_match(db):
     civ_draft = request.forms.get('civ_draft').replace('https://aoe2cm.net/draft/', '')
     date = int(datetime.datetime.strptime(request.forms.get('date'), '%Y-%m-%d').timestamp())
     best_of = request.forms.get('best_of')
-    p0_maps = '||'.join(request.forms.dict.get('p0_maps[]'))
-    p1_maps = '||'.join(request.forms.dict.get('p1_maps[]'))
+    p0_maps = request.forms.dict.get('p0_maps[]')
+    p1_maps = request.forms.dict.get('p1_maps[]')
     p0_name = request.forms.get('p0_name')
     p1_name = request.forms.get('p1_name')
     p0_map_ban = request.forms.get('p0_map_ban')
@@ -136,43 +143,67 @@ def post_match(db):
     user = db.execute('SELECT id FROM users WHERE password=? LIMIT 1', [password]).fetchone()
 
     if user is None:
-        abort(503, "Wrong password")
+        return error("Błędne hasło. Nie wymyślaj swojego :)")
 
     user_id = user[0]
 
-    recordings = [(file, get_match_info(file.file), recording_times[idx]) for idx, file in enumerate(recording_files)]
-    recordings.sort(key=lambda r: r[2])
+    # check if there are no duplicates by filenames
+    if len(set([file.filename for idx, file in enumerate(recording_files)])) != len(recording_files):
+        return error("Duplikaty plików")
+
+    all_maps = p0_maps + p1_maps
+
+    if p0_map_ban in all_maps or p0_map_ban in all_maps:
+        return error('Zbanowana mapa nie może być grana ;)')
+
+    recordings = []
+    for idx, file in enumerate(recording_files):
+        try:
+            match_info = get_match_info(file.file)
+            recordings.append((file, match_info, recording_times[idx]))
+        except:
+            return error(f"Uszkodzony plik nagrania: {file.filename}")
+    recordings.sort(key=lambda r: r[0].filename)
+
+    # check duplicates by map names
+    if len(set([r[1]['map_name'] for r in recordings])) != len(recordings):
+        return error('Powtórzone mapy')
+
+    # verify whether all the given recordings match the maps
+    expected_maps = ['Arabia'] + all_maps
+    for (_, match_info, _) in recordings:
+        if match_info['map_name'] not in expected_maps:
+            return error(f"Wybrano mapę spoza puli: {match_info['map_name']}")
 
     db.execute('BEGIN')
     res = db.execute(
         "INSERT INTO matches ('group', 'civ_draft', 'date', 'best_of', 'p0_maps', 'p1_maps', 'p0_name', 'p1_name',"
         " 'p0_map_ban', 'p1_map_ban', 'upload_user_id') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-        [group, civ_draft, date, best_of, p0_maps, p1_maps, p0_name, p1_name, p0_map_ban, p1_map_ban, user_id])
+        [group, civ_draft, date, best_of, '||'.join(p0_maps), '||'.join(p1_maps), p0_name, p1_name, p0_map_ban, p1_map_ban, user_id])
 
     match_id = res.lastrowid
 
     saved_files = []
     for i, (file, match_info, mod_time) in enumerate(recordings):
         new_filename = 'rec_match{}_{}'.format(match_id, i)
-        game_version = " ".join(str(x) for x in match_info['game_version'])
-        match_settings = match_info['match_settings']
+        game_version = f"{match_info['game_version'].name} {match_info['game_version'].value}"
         completed = 1 if match_info['completed'] else 0
-        game_map_type = match_settings['type'][1]
+        game_map_type = match_info['game_map_type']
         teams = match_info['teams']
         team_count = len(teams)
+        order = i
 
         res = db.execute(
             "INSERT INTO recordings ('filename', 'original_filename', 'mod_time', 'map_name', 'completed', 'game_version', 'game_map_type', 'team_count') VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            [new_filename, file.filename, mod_time, match_info['map_name'], completed, game_version, game_map_type,
-             team_count])
+            [new_filename, file.filename, mod_time, match_info['map_name'], completed, game_version, game_map_type, team_count])
         recording_id = res.lastrowid
-        db.execute("INSERT INTO matches_recordings ('match_id', 'recording_id') VALUES (?, ?)",
-                   [match_id, recording_id])
+        db.execute("INSERT INTO matches_recordings ('match_id', 'recording_id', 'order') VALUES (?, ?, ?)",
+                   [match_id, recording_id, order])
 
         players = match_info['players']
         for pi, player in enumerate(players):
-            profile_id = player['user_id']
-            number = player['number']
+            profile_id = player.profile_id
+            number = player.number
             team_index = 0
             for ti, team in enumerate(teams):
                 if number in team:
@@ -180,7 +211,7 @@ def post_match(db):
 
             db.execute(
                 "INSERT INTO recordings_players ('recording_id', 'name', 'civ', 'team_index', 'profile_id') VALUES (?, ?, ?, ?, ?)",
-                [recording_id, player['name'], player['civilization'], team_index, profile_id])
+                [recording_id, player.name, player.civilization, team_index, profile_id])
 
         with open('{}/{}'.format(cfg.RECORDINGS_PATH, new_filename), 'wb') as fp:
             utils.copy_file(file.file, fp)
@@ -225,11 +256,11 @@ def get_match_recording(match_id, rec_id, db):
     match = dict(
         db.execute("SELECT `date`, p0_name, p1_name, best_of, `group` FROM matches WHERE id=?", [match_id]).fetchone())
     match_date = datetime.datetime.fromtimestamp(match['date']).strftime('%Y-%m-%d')
-    rows = db.execute("SELECT filename, completed, recording_id as id FROM recordings JOIN matches_recordings"
+    rows = db.execute("SELECT filename, completed, recording_id as id, order FROM recordings JOIN matches_recordings"
                       " ON matches_recordings.recording_id = recordings.id WHERE matches_recordings.match_id = ?",
                       [match_id]).fetchall()
     recordings = [dict(r) for r in rows]
-    recordings.sort(key=lambda r: r['id'])
+    recordings.sort(key=lambda r: r['order'])
 
     rec_ = list(filter(lambda r: r['id'] == rec_id, recordings))[:1]
     if rec_:
@@ -269,7 +300,7 @@ def hello(fpath, db):
     return static_file(fpath, root=cfg.STATICS_PATH)
 
 
-@error(404)
+@bottle.error(404)
 def not_found(db):
     return index(db)
 

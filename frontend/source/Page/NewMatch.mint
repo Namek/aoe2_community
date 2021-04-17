@@ -226,17 +226,23 @@ component Page.NewMatch {
 
                 Debug.log(response)
 
-                if (response.status == 200) {
-                  sequence {
-                    `alert('Mecz zapisany, dzięki!')`
+                case (Utils.decodeServerError(response.body)) {
+                  Maybe::Just err => `alert(#{err})`
 
-                    `#{form}.reset()`
-                  }
-                } else {
-                  `alert("Błąd serwera: " + #{response}.status)`
+                  =>
+                    if (response.status == 200) {
+                      sequence {
+                        err =
+                          `alert('Mecz zapisany, dzięki!')`
+
+                        `#{form}.reset()`
+
+                        App.setMainTab(MainTab::Matches)
+                      }
+                    } else {
+                      `alert("Błąd serwera: " + #{response}.status)`
+                    }
                 }
-
-                App.setMainTab(MainTab::Matches)
               } catch Http.ErrorResponse => error {
                 `alert(JSON.stringify(#{error}))`
               }
