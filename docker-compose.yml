@@ -8,6 +8,8 @@ services:
     restart: always
     volumes:
       - appdb:/app/database
+    environment:
+      - PYTHONUNBUFFERED=1
 
 volumes:
   appdb:
