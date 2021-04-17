@@ -1,4 +1,8 @@
+from pathlib import Path
 import sqlite3
+
+import cfg
+import utils
 
 
 def migrate(db_path):
@@ -42,6 +46,21 @@ def migrate(db_path):
                     c.execute('UPDATE matches_recordings SET "order"=? WHERE recording_id=?', [ri, recording['id']])
 
             version += 1
+
+        if version == 2:
+            c.execute('ALTER TABLE recordings ADD "start_time_seconds" INTEGER DEFAULT 0 NOT NULL')
+            c.execute('ALTER TABLE recordings ADD "duration_seconds" INTEGER DEFAULT 0 NOT NULL')
+            print('Going to update start/duration times for recordings...')
+            rows = c.execute('SELECT id, filename FROM recordings').fetchall()
+            for (rid, filename) in rows:
+                filepath = f'{cfg.RECORDINGS_PATH}/{filename}'
+                if Path(filepath).exists():
+                    print(f'Updating recording: {filepath}')
+                    with open(filepath, 'rb') as file:
+                        m = utils.get_match_info(file)
+                        c.execute('UPDATE recordings SET start_time_seconds=? WHERE id=?', [m['start_time_seconds'], rid])
+                        c.execute('UPDATE recordings SET duration_seconds=? WHERE id=?', [m['duration_seconds'], rid])
+            print('Times updated.')
         if start_version != version:
             c.execute('DELETE FROM migration')
             c.execute('INSERT INTO migration (version) VALUES (?)', [version])

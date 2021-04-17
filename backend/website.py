@@ -42,21 +42,6 @@ def error(msg):
     return json.dumps(dict(error=msg))
 
 
-def get_match_info(data):
-    from mgz.model import parse_match
-
-    m = parse_match(data)
-
-    return dict(
-        map_name=m.map.name,
-        game_version=m.version,
-        game_map_type=m.type,
-        players=m.players,
-        teams=m.teams,
-        completed=False,
-    )
-
-
 @route('/api/auth/check', method='POST')
 def auth_check(db):
     session = request.environ.get('beaker.session')
@@ -159,7 +144,7 @@ def post_match(db):
     recordings = []
     for idx, file in enumerate(recording_files):
         try:
-            match_info = get_match_info(file.file)
+            match_info = utils.get_match_info(file.file)
             recordings.append((file, match_info, recording_times[idx]))
         except:
             return error(f"Uszkodzony plik nagrania: {file.filename}")
@@ -191,11 +176,17 @@ def post_match(db):
         game_map_type = match_info['game_map_type']
         teams = match_info['teams']
         team_count = len(teams)
+        start_time = match_info['start_time_seconds']
+        duration = match_info['duration_seconds']
         order = i
 
         res = db.execute(
-            "INSERT INTO recordings ('filename', 'original_filename', 'mod_time', 'map_name', 'completed', 'game_version', 'game_map_type', 'team_count') VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            [new_filename, file.filename, mod_time, match_info['map_name'], completed, game_version, game_map_type, team_count])
+            "INSERT INTO recordings ('filename', 'original_filename', 'mod_time', 'map_name', 'completed',"
+            " 'game_version', 'game_map_type', 'team_count', 'start_time_seconds', 'duration_seconds')"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [new_filename, file.filename, mod_time, match_info['map_name'], completed,
+             game_version, game_map_type, team_count, start_time, duration])
+
         recording_id = res.lastrowid
         db.execute("INSERT INTO matches_recordings ('match_id', 'recording_id', 'order') VALUES (?, ?, ?)",
                    [match_id, recording_id, order])
@@ -213,7 +204,7 @@ def post_match(db):
                 "INSERT INTO recordings_players ('recording_id', 'name', 'civ', 'team_index', 'profile_id') VALUES (?, ?, ?, ?, ?)",
                 [recording_id, player.name, player.civilization, team_index, profile_id])
 
-        with open('{}/{}'.format(cfg.RECORDINGS_PATH, new_filename), 'wb') as fp:
+        with open(f'{cfg.RECORDINGS_PATH}/{new_filename}', 'wb') as fp:
             utils.copy_file(file.file, fp)
             saved_files.append(new_filename)
 
