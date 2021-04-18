@@ -172,6 +172,14 @@ component Page.Calendar {
     font-weight: normal;
   }
 
+  fun componentDidMount {
+    if (@ENABLE_CALENDAR == "1") {
+      Calendar.init()
+    } else {
+      Promise.never()
+    }
+  }
+
   fun render : Html {
     try {
       firstMonthDay =

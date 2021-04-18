@@ -1,19 +1,13 @@
 routes {
-  * {
+  / {
     sequence {
       App.init()
-
-      /* App.setModal(Modal::LogIn) */
-      if (@ENABLE_CALENDAR == "1") {
-        Calendar.init()
-      } else {
-        Promise.never()
-      }
     }
   }
 
   /admin {
     sequence {
+      App.init()
       Window.setUrl("/")
       App.setModal(Modal::LogIn)
     }
@@ -21,6 +15,7 @@ routes {
 
   /logout {
     sequence {
+      App.init()
       Window.setUrl("/")
       App.logOut()
     }

@@ -185,8 +185,13 @@ component Page.Matches {
                           for (rec of match.recordings
                           |> Array.mapWithIndex((rec : Recording, i : Number) { {rec, i} })) {
                             <>
-                              <a href="#{@ENDPOINT}/api/match/#{match.matchId}/recording/#{rec[0].id}">
+                              <a
+                                href="#{@ENDPOINT}/api/match/#{match.matchId}/recording/#{rec[0].id}"
+                                target="_blank"
+                                rel="noopener noreferrer">
+
                                 "##{rec[1] + 1}"
+
                               </a>
 
                               " "
@@ -229,6 +234,7 @@ component Page.Matches {
           <td>
             <a
               href="https://aoe2cm.net/draft/#{match.civDraft}"
+              rel="noopener noreferrer"
               target="_blank">
 
               "Civ Draft"
