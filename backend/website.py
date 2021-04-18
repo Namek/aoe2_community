@@ -247,8 +247,8 @@ def get_match_recording(match_id, rec_id, db):
     match = dict(
         db.execute("SELECT `date`, p0_name, p1_name, best_of, `group` FROM matches WHERE id=?", [match_id]).fetchone())
     match_date = datetime.datetime.fromtimestamp(match['date']).strftime('%Y-%m-%d')
-    rows = db.execute("SELECT filename, completed, recording_id as id, order FROM recordings JOIN matches_recordings"
-                      " ON matches_recordings.recording_id = recordings.id WHERE matches_recordings.match_id = ?",
+    rows = db.execute('SELECT filename, completed, recording_id as id, "order" FROM recordings JOIN matches_recordings'
+                      ' ON matches_recordings.recording_id = recordings.id WHERE matches_recordings.match_id = ?',
                       [match_id]).fetchall()
     recordings = [dict(r) for r in rows]
     recordings.sort(key=lambda r: r['order'])
