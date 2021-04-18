@@ -171,7 +171,7 @@ def post_match(db):
     saved_files = []
     for i, (file, match_info, mod_time) in enumerate(recordings):
         new_filename = 'rec_match{}_{}'.format(match_id, i)
-        game_version = f"{match_info['game_version'].name} {match_info['game_version'].value}"
+        game_version = match_info['game_version']
         completed = 1 if match_info['completed'] else 0
         game_map_type = match_info['game_map_type']
         teams = match_info['teams']
@@ -193,8 +193,8 @@ def post_match(db):
 
         players = match_info['players']
         for pi, player in enumerate(players):
-            profile_id = player.profile_id
-            number = player.number
+            profile_id = player['user_id']
+            number = player['number']
             team_index = 0
             for ti, team in enumerate(teams):
                 if number in team:
@@ -202,7 +202,7 @@ def post_match(db):
 
             db.execute(
                 "INSERT INTO recordings_players ('recording_id', 'name', 'civ', 'team_index', 'profile_id') VALUES (?, ?, ?, ?, ?)",
-                [recording_id, player.name, player.civilization, team_index, profile_id])
+                [recording_id, player['name'], player['civilization'], team_index, profile_id])
 
         with open(f'{cfg.RECORDINGS_PATH}/{new_filename}', 'wb') as fp:
             utils.copy_file(file.file, fp)
