@@ -15,6 +15,8 @@ import utils
 app = bottle.app()
 app.install(SQLitePlugin(dbfile=cfg.DB_PATH, autocommit=False))
 
+ROLE_ADMIN = 1
+
 if cfg.CORS_ALLOW_ORIGIN:
     def add_cors_headers(res):
         res.headers['Access-Control-Allow-Origin'] = cfg.CORS_ALLOW_ORIGIN or '*'
@@ -93,7 +95,7 @@ def remove_match(match_id, db):
     if 'user_id' not in session:
         abort(401)
 
-    user = db.execute('SELECT id FROM users WHERE id=? AND roles=1 LIMIT 1', [session['user_id']]).fetchone()
+    user = db.execute('SELECT id FROM users WHERE id=? AND roles=? LIMIT 1', [session['user_id'], ROLE_ADMIN]).fetchone()
     if not user:
         abort(403)
 
@@ -125,12 +127,13 @@ def post_match(db):
     recording_files = request.files.dict.get('recording_files[]')
     recording_times = request.forms.dict.get('recording_times[]')
 
-    user = db.execute('SELECT id FROM users WHERE password=? LIMIT 1', [password]).fetchone()
+    user = db.execute('SELECT id, roles FROM users WHERE password=? LIMIT 1', [password]).fetchone()
 
     if user is None:
         return error("Błędne hasło. Nie wymyślaj swojego :)")
 
     user_id = user[0]
+    is_admin = int(user[1]) == ROLE_ADMIN
 
     # check if there are no duplicates by filenames
     if len(set([file.filename for idx, file in enumerate(recording_files)])) != len(recording_files):
@@ -157,8 +160,18 @@ def post_match(db):
     # verify whether all the given recordings match the maps
     expected_maps = ['Arabia'] + all_maps
     for (_, match_info, _) in recordings:
-        if match_info['map_name'] not in expected_maps:
-            return error(f"Wybrano mapę spoza puli: {match_info['map_name']}")
+        ok = False
+
+        if is_admin:
+            for name in expected_maps:
+                # e.g. "Gold Rush" in "HC4 - Gold Rush"
+                if match_info['map_name'] in name:
+                    ok = True
+        else:
+            ok = match_info['map_name'] in expected_maps
+
+        if not ok:
+            return error(f"Mapa {match_info['map_name']} jest spoza podanej puli: {', '.join(expected_maps)}.")
 
     db.execute('BEGIN')
     res = db.execute(
