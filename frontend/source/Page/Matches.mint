@@ -140,9 +140,9 @@ component Page.Matches {
   fun render : Html {
     <div::app>
       case (matches) {
-        Maybe::Just result =>
+        Maybe::Just(result) =>
           case (result) {
-            Result::Ok ms =>
+            Result::Ok(ms) =>
               if (Array.size(ms) == 0) {
                 <p>"Brak meczy."</p>
               } else {
@@ -216,7 +216,7 @@ component Page.Matches {
                 </table>
               }
 
-            Result::Err err =>
+            Result::Err(err) =>
               <p>
                 <{ err }>
               </p>

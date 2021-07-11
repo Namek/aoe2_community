@@ -9,7 +9,7 @@ component Main {
 
   fun logIn {
     case (logInPasswordEl) {
-      Maybe::Just element =>
+      Maybe::Just(element) =>
         sequence {
           password =
             `#{element}.value`

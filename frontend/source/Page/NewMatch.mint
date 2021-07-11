@@ -102,7 +102,7 @@ component Page.NewMatch {
         {
           collectedRecordingFiles =
             case (file) {
-              Maybe::Just f =>
+              Maybe::Just(f) =>
                 Map.set(index, f, collectedRecordingFiles)
 
               Maybe::Nothing => Map.delete(index, collectedRecordingFiles)
@@ -182,7 +182,7 @@ component Page.NewMatch {
       App.setLoading(true)
 
       case (matchForm) {
-        Maybe::Just form =>
+        Maybe::Just(form) =>
           try {
             formData =
               (`new FormData(document.forms[0])`)
@@ -227,7 +227,7 @@ component Page.NewMatch {
                 Debug.log(response)
 
                 case (Utils.decodeServerError(response.body)) {
-                  Maybe::Just err => `alert(#{err})`
+                  Maybe::Just(err) => `alert(#{err})`
 
                   =>
                     if (response.status == 200) {

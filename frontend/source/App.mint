@@ -15,7 +15,7 @@ store App {
 
   get hasAdminRole {
     case (loggedInUser) {
-      Maybe::Just user => user.roles == 1
+      Maybe::Just(user) => user.roles == 1
       => false
     }
     |> Debug.log
