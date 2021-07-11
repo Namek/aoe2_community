@@ -1,6 +1,7 @@
 import threading
 from pathlib import Path
 import os
+import sys
 
 import cfg
 from migrate import migrate
@@ -25,7 +26,7 @@ for dir in [cfg.SESSIONS_DATA_DIR, cfg.SESSIONS_LOCK_DIR, cfg.RECORDINGS_PATH]:
 
 
 def run_website():
-    import website
+        import website
 
 
 def run_discord_bot():
@@ -33,16 +34,24 @@ def run_discord_bot():
         import discord_bot
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     threads = [
         threading.Thread(target=run_website, daemon=True),
         # threading.Thread(target=run_discord_bot, daemon=True)
     ]
-    for t in threads:
-        t.start()
 
-    for t in threads:
-        try:
-            t.join()
-        except:
-            pass
+    try:
+        for t in threads:
+            t.start()
+
+        alive_threads_count = len(threads)
+
+        while alive_threads_count > 0:
+            for t in threads:
+                if t.is_alive():
+                    t.join(0.5)
+                else:
+                    alive_threads_count -= 1
+
+    except KeyboardInterrupt as e:
+        sys.exit(e)
