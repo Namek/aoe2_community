@@ -1,5 +1,5 @@
 component Page.NewMatch {
-  const GROUPS = ["Gold", "Red", "Black", "Blue", "Green"]
+  const GROUPS = ["Mecze Rotacyjne", "Gold", "Red", "Black", "Blue", "Green"]
 
   const MAPS_GOLD_RED =
     [
@@ -29,6 +29,53 @@ component Page.NewMatch {
       "Arena",
       "Four Lakes",
       "HC4 - Gold Rush"
+    ]
+
+  const MAPS_ROTATION =
+    [
+      "RBW3 - Haboob",
+      "HC4 - Gold Rush"
+    ]
+
+  const ALL_CIVS =
+    [
+      "Aztecs",
+      "Berbers",
+      "Britons",
+      "Bulgarians",
+      "Burgundians",
+      "Burmese",
+      "Byzantines",
+      "Celts",
+      "Chinese",
+      "Cumans",
+      "Ethiopians",
+      "Franks",
+      "Goths",
+      "Huns",
+      "Incas",
+      "Indians",
+      "Italians",
+      "Japanese",
+      "Khmer",
+      "Koreans",
+      "Lithuanians",
+      "Magyars",
+      "Malay",
+      "Malians",
+      "Mayans",
+      "Mongols",
+      "Persians",
+      "Portuguese",
+      "Saracens",
+      "Sicilians",
+      "Slavs",
+      "Spanish",
+      "Teutons",
+      "Tatars",
+      "Turks",
+      "Vietnamese",
+      "Vikings"
     ]
 
   state selectedGroup = ""
@@ -66,8 +113,27 @@ component Page.NewMatch {
       "Black" => MAPS_BLACK_BLUE
       "Blue" => MAPS_BLACK_BLUE
       "Green" => MAPS_GREEN
+      "Mecze Rotacyjne" => MAPS_ROTATION
       => []
     }
+  }
+
+  get civDraftEnabled {
+    case (selectedGroup) {
+      "Mecze Rotacyjne" => false
+      => true
+    }
+  }
+
+  get civBansCount {
+    case (selectedGroup) {
+      "Mecze Rotacyjne" => 2
+      => 0
+    }
+  }
+
+  get mapBanEnabled {
+    Array.size(maps) > 2
   }
 
   fun moreRecordings (evt : Html.Event) {
@@ -112,11 +178,13 @@ component Page.NewMatch {
   }
 
   fun validateForm {
-    next
-      {
-        invalidFields = Debug.log(validateFormData(`new FormData(document.forms[0])`)),
-        isFormValid = Array.isEmpty(invalidFields)
-      }
+    sequence {
+      next
+        {
+          invalidFields = Debug.log(validateFormData(`new FormData(document.forms[0])`)),
+          isFormValid = Array.isEmpty(invalidFields)
+        }
+    }
   }
 
   fun validateFormData (formData : FormData) {
@@ -149,7 +217,9 @@ component Page.NewMatch {
               if (key === "recording_files[]") {
                 isInvalid = val.length < #{minimumRecordingsAmount}
               } else if (key === "p0_maps[]" || key === "p1_maps[]") {
-                isInvalid = val.length < #{minimumMapsPickedByPlayer}
+                isInvalid = val.length < #{minimumMapsPickedByPlayer} || (new Set(val)).size !== val.length
+              } else if (key == "p0_civ_bans[]" || key == "p1_civ_bans[]") {
+                isInvalid = val.length < #{civBansCount} || (new Set(val)).size !== val.length
               } else if (key === "civ_draft") {
                 isInvalid = !/^(https:\/\/aoe2cm.net\/draft\/)?[A-Za-z0-9]{5}$/.test(val)
               }
@@ -293,20 +363,22 @@ component Page.NewMatch {
             </div>
           </div>
 
-          <div class="field">
-            <label class="label">
-              "Civ Draft: link lub kod"
-            </label>
+          if (civDraftEnabled) {
+            <div class="field">
+              <label class="label">
+                "Civ Draft: link lub kod"
+              </label>
 
-            <div class="control">
-              <input
-                class="input #{Utils.whenStr(markFieldError("civ_draft"), "is-danger")}"
-                type="text"
-                name="civ_draft"
-                required="true"
-                placeholder="np. WXfmK lub https://aoe2cm.net/draft/WXfmK"/>
+              <div class="control">
+                <input
+                  class="input #{Utils.whenStr(markFieldError("civ_draft"), "is-danger")}"
+                  type="text"
+                  name="civ_draft"
+                  required="true"
+                  placeholder="np. WXfmK lub https://aoe2cm.net/draft/WXfmK"/>
+              </div>
             </div>
-          </div>
+          }
 
           <div class="field">
             <label class="label">
@@ -442,30 +514,32 @@ component Page.NewMatch {
         </div>
       </div>
 
-      <div class="field">
-        <div class="control">
-          try {
-            name =
-              "p#{playerIndex}_map_ban"
+      if (mapBanEnabled) {
+        <div class="field">
+          <div class="control">
+            try {
+              name =
+                "p#{playerIndex}_map_ban"
 
-            <div class="select is-fullwidth #{Utils.whenStr(markFieldError(name), "is-danger")}">
-              <select
-                name={name}
-                disabled={Array.isEmpty(maps)}>
+              <div class="select is-fullwidth #{Utils.whenStr(markFieldError(name), "is-danger")}">
+                <select
+                  name={name}
+                  disabled={Array.isEmpty(maps)}>
 
-                <option>"-- Ban Mapy --"</option>
+                  <option>"-- Ban Mapy --"</option>
 
-                for (map of maps) {
-                  <option value={map}>
-                    "#{map}"
-                  </option>
-                }
+                  for (map of maps) {
+                    <option value={map}>
+                      "#{map}"
+                    </option>
+                  }
 
-              </select>
-            </div>
-          }
+                </select>
+              </div>
+            }
+          </div>
         </div>
-      </div>
+      }
 
       for (i of Array.range(1, minimumMapsPickedByPlayer + 1)) {
         <div class="field">
@@ -492,6 +566,31 @@ component Page.NewMatch {
             }
           </div>
         </div>
+      }
+
+      if (civBansCount > 0) {
+        for (i of Array.range(0, civBansCount - 1)) {
+          <div class="field">
+            <div class="control">
+              try {
+                name =
+                  "p#{playerIndex}_civ_bans[]"
+
+                <div class="select is-fullwidth #{Utils.whenStr(markFieldError(name), "is-danger")}">
+                  <select name={name}>
+                    <option>"-- Ban Civ #{i + 1}. --"</option>
+
+                    for (civ of ALL_CIVS) {
+                      <option value={civ}>
+                        "#{civ}"
+                      </option>
+                    }
+                  </select>
+                </div>
+              }
+            </div>
+          </div>
+        }
       }
     </div>
   }

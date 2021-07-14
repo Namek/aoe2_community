@@ -80,15 +80,17 @@ store Matches {
 record Match {
   matchId : Number using "id",
   group : String,
-  civDraft : String using "civ_draft",
+  civDraft : Maybe(String) using "civ_draft",
   date : Number,
   bestOf : Number using "best_of",
   p0Name : String using "p0_name",
   p1Name : String using "p1_name",
-  p0MapBan : String using "p0_map_ban",
-  p1MapBan : String using "p1_map_ban",
+  p0MapBan : Maybe(String) using "p0_map_ban",
+  p1MapBan : Maybe(String) using "p1_map_ban",
   p0Maps : Array(String) using "p0_maps",
   p1Maps : Array(String) using "p1_maps",
+  p0CivBans : Array(String) using "p0_civ_bans",
+  p1CivBans : Array(String) using "p1_civ_bans",
   recordings : Array(Recording)
 }
 
@@ -232,14 +234,16 @@ component Page.Matches {
       <thead>
         <tr>
           <td>
-            <a
-              href="https://aoe2cm.net/draft/#{match.civDraft}"
-              rel="noopener noreferrer"
-              target="_blank">
+            if (String.isNotBlank(civDraft)) {
+              <a
+                href="https://aoe2cm.net/draft/#{civDraft}"
+                rel="noopener noreferrer"
+                target="_blank">
 
-              "Civ Draft"
+                "Civ Draft"
 
-            </a>
+              </a>
+            }
           </td>
 
           <td>"#{match.p0Name}"</td>
@@ -248,23 +252,54 @@ component Page.Matches {
       </thead>
 
       <tbody>
-        <tr>
-          <th>"ban"</th>
-          <td>"#{match.p0MapBan}"</td>
-          <td>"#{match.p1MapBan}"</td>
-        </tr>
+        if (String.isNotBlank(p0MapBan) || String.isNotBlank(p1MapBan)) {
+          <tr>
+            <th>"map ban"</th>
+            <td>"#{p0MapBan}"</td>
+            <td>"#{p1MapBan}"</td>
+          </tr>
+        }
 
         <tr>
           <th>"home mapy"</th>
 
-          <td>"#{match.p0Maps
-            |> String.join(", ")}"</td>
+          <td>
+            "#{match.p0Maps
+            |> String.join(", ")}"
+          </td>
 
-          <td>"#{match.p1Maps
-            |> String.join(", ")}"</td>
+          <td>
+            "#{match.p1Maps
+            |> String.join(", ")}"
+          </td>
         </tr>
+
+        if (!Array.isEmpty(match.p0CivBans)) {
+          <tr>
+            <th>"civ bans"</th>
+
+            <td>
+              "#{match.p0CivBans
+              |> String.join(", ")}"
+            </td>
+
+            <td>
+              "#{match.p1CivBans
+              |> String.join(", ")}"
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
+  } where {
+    civDraft =
+      match.civDraft or ""
+
+    p0MapBan =
+      match.p0MapBan or ""
+
+    p1MapBan =
+      match.p1MapBan or ""
   }
 
   style app {

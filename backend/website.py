@@ -114,7 +114,9 @@ def remove_match(match_id, db):
 @route('/api/match', method='POST')
 def post_match(db):
     group = request.forms.get('group')
-    civ_draft = request.forms.get('civ_draft').replace('https://aoe2cm.net/draft/', '')
+    civ_draft = request.forms.get('civ_draft')
+    if civ_draft:
+        civ_draft = civ_draft.replace('https://aoe2cm.net/draft/', '')
     date = int(datetime.datetime.strptime(request.forms.get('date'), '%Y-%m-%d').timestamp())
     best_of = request.forms.get('best_of')
     p0_maps = request.forms.dict.get('p0_maps[]')
@@ -123,6 +125,8 @@ def post_match(db):
     p1_name = request.forms.get('p1_name')
     p0_map_ban = request.forms.get('p0_map_ban')
     p1_map_ban = request.forms.get('p1_map_ban')
+    p0_civ_bans = request.forms.dict.get('p0_civ_bans[]') or []
+    p1_civ_bans = request.forms.dict.get('p1_civ_bans[]') or []
     password = request.forms.get('password')
     recording_files = request.files.dict.get('recording_files[]')
     recording_times = request.forms.dict.get('recording_times[]')
@@ -135,13 +139,18 @@ def post_match(db):
     user_id = user[0]
     is_admin = int(user[1]) == ROLE_ADMIN
 
+    # check duplicates of civ bans
+    if p0_civ_bans:
+        if len(set(p0_civ_bans)) != len(p0_civ_bans) or len(set(p1_civ_bans)) != len(p1_civ_bans):
+            error("Powtórzone bany cywilizacji")
+
     # check if there are no duplicates by filenames
     if len(set([file.filename for idx, file in enumerate(recording_files)])) != len(recording_files):
         return error("Duplikaty plików")
 
     all_maps = p0_maps + p1_maps
 
-    if p0_map_ban in all_maps or p0_map_ban in all_maps:
+    if (p0_map_ban and p0_map_ban in all_maps) or (p1_map_ban and p1_map_ban in all_maps):
         return error('Zbanowana mapa nie może być grana ;)')
 
     recordings = []
@@ -154,8 +163,9 @@ def post_match(db):
     recordings.sort(key=lambda r: r[0].filename)
 
     # check duplicates by map names
-    if len(set([r[1]['map_name'] for r in recordings])) != len(recordings):
-        return error('Powtórzone mapy')
+    map_names = [r[1]['map_name'] for r in recordings]
+    if len(set(map_names)) != len(recordings):
+        return error(f'Powtórzono mapy: {", ".join(map_names)}')
 
     # verify whether all the given recordings match the maps
     expected_maps = ['Arabia'] + all_maps
@@ -176,8 +186,8 @@ def post_match(db):
     db.execute('BEGIN')
     res = db.execute(
         "INSERT INTO matches ('group', 'civ_draft', 'date', 'best_of', 'p0_maps', 'p1_maps', 'p0_name', 'p1_name',"
-        " 'p0_map_ban', 'p1_map_ban', 'upload_user_id') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-        [group, civ_draft, date, best_of, '||'.join(p0_maps), '||'.join(p1_maps), p0_name, p1_name, p0_map_ban, p1_map_ban, user_id])
+        " 'p0_map_ban', 'p1_map_ban', 'upload_user_id', 'p0_civ_bans', 'p1_civ_bans') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+        [group, civ_draft, date, best_of, '||'.join(p0_maps), '||'.join(p1_maps), p0_name, p1_name, p0_map_ban, p1_map_ban, user_id, '||'.join(p0_civ_bans), '||'.join(p1_civ_bans)])
 
     match_id = res.lastrowid
 
@@ -237,6 +247,8 @@ def get_matches(db):
         match.pop('upload_user_id')
         match['p0_maps'] = match['p0_maps'].split('||')
         match['p1_maps'] = match['p1_maps'].split('||')
+        match['p0_civ_bans'] = match['p0_civ_bans'].split('||') if match['p0_civ_bans'] else []
+        match['p1_civ_bans'] = match['p1_civ_bans'].split('||') if match['p1_civ_bans'] else []
         rows = db.execute(
             "SELECT game_version, recording_id as id FROM recordings JOIN matches_recordings ON recording_id=recordings.id WHERE match_id=?",
             [match['id']]).fetchall()

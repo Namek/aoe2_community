@@ -29,6 +29,7 @@ def migrate(db_path):
         block(ctx, ver2)
         block(ctx, ver3)
         block(ctx, ver4)
+        block(ctx, ver5)
 
 
 def block(ctx, fn):
@@ -114,3 +115,7 @@ def ver4(c):
             except:
                 print(f"Couldn't process {filename}")
     print('Times updated.')
+
+def ver5(c):
+    c.execute('ALTER TABLE matches ADD "p0_civ_bans" TEXT')
+    c.execute('ALTER TABLE matches ADD "p1_civ_bans" TEXT')

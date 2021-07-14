@@ -1,9 +1,10 @@
 store App {
-  state mainTab = if (@ENABLE_CALENDAR == "1") {
-    MainTab::Calendar
-  } else {
-    MainTab::Matches
-  }
+  state mainTab =
+    if (@ENABLE_CALENDAR == "1") {
+      MainTab::Calendar
+    } else {
+      MainTab::Matches
+    }
 
   state loading = false
   state loggedInUser : Maybe(LoggedInUser) = Maybe::Nothing
