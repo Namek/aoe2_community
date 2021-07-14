@@ -7,7 +7,6 @@
   },
   "external": {
     "stylesheets": [
-      "assets/bulma.css",
       "assets/style.css"
     ]
   },
