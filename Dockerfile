@@ -14,6 +14,7 @@ RUN mint build --env .env --skip-service-worker
 FROM python:3.8-slim AS server
 WORKDIR /app
 COPY backend/requirements.txt .
+COPY backend/mgz ./mgz
 RUN pip install -r requirements.txt --no-cache-dir
 COPY --from=build-frontend /app/dist ./static
 COPY backend/database/app.template.db ./database/
