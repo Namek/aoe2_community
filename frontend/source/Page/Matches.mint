@@ -57,7 +57,7 @@ store Matches {
 
           /* |> Http.formDataBody(FormData.empty()) */
           response =
-            "#{@ENDPOINT}/api/match/#{match.matchId}"
+            "#{@ENDPOINT}/api/match/#{match.id}"
             |> Http.delete()
             |> Http.withCredentials(true)
             |> Http.send()
@@ -78,7 +78,7 @@ store Matches {
 }
 
 record Match {
-  matchId : Number using "id",
+  id : Number using "id",
   group : String,
   civDraft : Maybe(String) using "civ_draft",
   date : Number,
@@ -188,7 +188,7 @@ component Page.Matches {
                           |> Array.mapWithIndex((rec : Recording, i : Number) { {rec, i} })) {
                             <>
                               <a
-                                href="#{@ENDPOINT}/api/match/#{match.matchId}/recording/#{rec[0].id}"
+                                href="#{@ENDPOINT}/api/match/#{match.id}/recording/#{rec[0].id}"
                                 target="_blank"
                                 rel="noopener noreferrer">
 

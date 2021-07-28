@@ -17,7 +17,7 @@ module Utils {
       |> Maybe.andThen(
         (obj : Object) {
           decode obj as ServerError
-          |> Result.map((err : ServerError) { err.error })
+          |> Result.map((err : ServerError) { err.detail })
           |> Result.toMaybe()
         })
     }

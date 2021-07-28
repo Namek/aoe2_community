@@ -133,5 +133,5 @@ record LoggedInUser {
 }
 
 record ServerError {
-  error : String
+  detail : String
 }

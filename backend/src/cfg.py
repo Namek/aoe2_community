@@ -12,8 +12,6 @@ CORS_ALLOW_ORIGIN = os.getenv('CORS_ALLOW_ORIGIN')
 STATICS_PATH = os.getenv('STATICS_PATH') or './static'
 DB_TEMPLATE_PATH = os.getenv('DB_TEMPLATE_PATH') or './database/app.template.db'
 DB_PATH = os.getenv('DB_PATH') or './database/app.db'
-SESSIONS_DATA_DIR = os.getenv('SESSIONS_PATH') or './database/sessions/data'
-SESSIONS_LOCK_DIR = os.getenv('SESSIONS_PATH') or './database/sessions/lock'
 SESSION_SECRET = os.getenv('SESSION_SECRET') or ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(30))
 
 ENABLE_DISCORD_BOT = bool(os.getenv('ENABLE_DISCORD_BOT') or True)

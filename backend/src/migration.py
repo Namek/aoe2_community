@@ -1,9 +1,7 @@
 from pathlib import Path
 import sqlite3
 
-import cfg
-import utils
-
+from . import cfg, utils
 
 def migrate(db_path):
     with sqlite3.connect(db_path) as db:

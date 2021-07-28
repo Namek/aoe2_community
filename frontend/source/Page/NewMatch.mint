@@ -308,9 +308,31 @@ component Page.NewMatch {
                   #{formData}.set('best_of', #{bestOf})
                 })()`
 
+                /* fix for FastAPI: remove "[]" from variable names */
+                finalFormData =
+                  `(() => {
+                    const newFormData = new FormData()
+                    console.log('allkeys', new Set(#{formData}.keys()))
+                    for (const key of new Set(#{formData}.keys())) {
+                      if (key.endsWith("[]")) {
+                        const newKey = key.slice(0, -2)
+                        const arr = #{formData}.getAll(key)
+                        console.log(arr)
+                        for (const val of arr) {
+                          newFormData.append(newKey, val)
+                        }
+                      } else {
+                        newFormData.set(key, #{formData}.get(key))
+                      }
+                    }
+
+                    return newFormData
+                  })()
+                  ` as FormData
+
                 response =
                   Http.post("#{@ENDPOINT}/api/match")
-                  |> Http.formDataBody(formData)
+                  |> Http.formDataBody(finalFormData)
                   |> Http.send()
 
                 Debug.log(response)

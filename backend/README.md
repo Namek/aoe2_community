@@ -1,1 +1,0 @@
-Uses https://github.com/happyleavesaoc/aoc-mgz 
