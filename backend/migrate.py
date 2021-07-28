@@ -30,6 +30,7 @@ def migrate(db_path):
         block(ctx, ver3)
         block(ctx, ver4)
         block(ctx, ver5)
+        block(ctx, ver6)
 
 
 def block(ctx, fn):
@@ -119,3 +120,7 @@ def ver4(c):
 def ver5(c):
     c.execute('ALTER TABLE matches ADD "p0_civ_bans" TEXT')
     c.execute('ALTER TABLE matches ADD "p1_civ_bans" TEXT')
+
+def ver6(c):
+    c.execute('CREATE UNIQUE INDEX users_idx on users(name)')
+    c.execute('CREATE UNIQUE INDEX recordings_idx on recordings(filename)')
