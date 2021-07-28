@@ -1,34 +1,53 @@
 component Page.NewMatch {
   const GROUPS = ["Mecze Rotacyjne", "Gold", "Red", "Black", "Blue", "Green"]
 
-  const MAPS_GOLD_RED =
+  const MAPS_GOLD =
     [
-      "Socotra",
-      "HC4 - Bay",
-      "HC4 - Gold Rush",
-      "HC4 - Islands",
-      "RBW3 - Kawasan",
-      "RBW3 - Lowland",
-      "RBW3 - Sacred Springs",
-      "RBW3 - Haboob"
+      "Land Madness",
+      "Bog Islands",
+      "TidePool",
+      "HC4 - Bypass",
+      "RBW3 - Rockslide",
+      "RBW4 - Acclivity",
+      "RBW4 - Meadow"
     ]
 
-  const MAPS_BLACK_BLUE =
+  const MAPS_RED =
     [
-      "Socotra",
-      "HC4 - Gold Rush",
-      "RBW3 - Haboob",
-      "RBW3 - Lowland",
-      "RBW3 - Kawasan"
+      "Land Madness",
+      "Bog Islands",
+      "TidePool",
+      "HC4 - Bypass",
+      "HC4 - Mudflow",
+      "RBW4 - Acclivity",
+      "RBW4 - Meadow"
+    ]
+
+  const MAPS_BLACK =
+    [
+      "Land Madness",
+      "Bog Islands",
+      "TidePool",
+      "HC4 - Bypass",
+      "RBW4 - Meadow"
+    ]
+
+  const MAPS_BLUE =
+    [
+      "Land Madness",
+      "Golden Pit",
+      "HC4 - Bypass",
+      "RBW3 - Cattails",
+      "RBW4 - Meadow"
     ]
 
   const MAPS_GREEN =
     [
+      "Acropolis",
       "Atacama",
-      "Socotra",
-      "Arena",
-      "Four Lakes",
-      "HC4 - Gold Rush"
+      "HC4 - Bypass",
+      "HC4 - Gold Rush",
+      "RBW3 - Cattails"
     ]
 
   const MAPS_ROTATION =
@@ -108,10 +127,10 @@ component Page.NewMatch {
 
   get maps {
     case (selectedGroup) {
-      "Gold" => MAPS_GOLD_RED
-      "Red" => MAPS_GOLD_RED
-      "Black" => MAPS_BLACK_BLUE
-      "Blue" => MAPS_BLACK_BLUE
+      "Gold" => MAPS_GOLD
+      "Red" => MAPS_RED
+      "Black" => MAPS_BLACK
+      "Blue" => MAPS_BLUE
       "Green" => MAPS_GREEN
       "Mecze Rotacyjne" => MAPS_ROTATION
       => []
