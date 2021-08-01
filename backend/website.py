@@ -172,13 +172,10 @@ def post_match(db):
     for (_, match_info, _) in recordings:
         ok = False
 
-        if is_admin:
-            for name in expected_maps:
-                # e.g. "Gold Rush" in "HC4 - Gold Rush"
-                if match_info['map_name'] in name:
-                    ok = True
-        else:
-            ok = match_info['map_name'] in expected_maps
+        for name in expected_maps:
+            # e.g. "Gold Rush" in "HC4 - Gold Rush" or "AnT - Arabia" as "Arabia"
+            if match_info['map_name'] in name or match_info['map_name'] in ("AnT - " + name):
+                ok = True
 
         if not ok:
             return error(f"Mapa {match_info['map_name']} jest spoza podanej puli: {', '.join(expected_maps)}.")
