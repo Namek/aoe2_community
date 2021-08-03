@@ -163,8 +163,8 @@ def post_match(db):
     recordings.sort(key=lambda r: r[0].filename)
 
     # check duplicates by map names
-    map_names = [r[1]['map_name'] for r in recordings]
-    if len(set(map_names)) != len(recordings):
+    map_names = [r[1]['map_name'] for r in recordings if r[1]['start_time_seconds'] <= 5]
+    if len(set(map_names)) != len(map_names):
         return error(f'Powtórzono mapy: {", ".join(map_names)}')
 
     # verify whether all the given recordings match the maps

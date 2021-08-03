@@ -24,7 +24,7 @@ def get_match_info(data):
             players=players,
             teams=m.teams,
             completed=False,
-            start_time_seconds=str(m.actions[0].timestamp.seconds),
+            start_time_seconds=int(m.actions[0].timestamp.seconds),
             duration_seconds=m.duration.seconds,
         )
     except RuntimeError:
