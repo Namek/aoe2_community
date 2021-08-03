@@ -1,6 +1,7 @@
 import datetime
 import json
 import random
+import re
 import secrets
 import types
 
@@ -170,15 +171,20 @@ def post_match(db):
     # verify whether all the given recordings match the maps
     expected_maps = ['Arabia'] + all_maps
     for (_, match_info, _) in recordings:
-        ok = False
+        map_name = match_info['map_name']
 
-        for name in expected_maps:
+        ok = False
+        for expected_name in expected_maps:
             # e.g. "Gold Rush" in "HC4 - Gold Rush" or "AnT - Arabia" as "Arabia"
-            if match_info['map_name'] in name or match_info['map_name'] in ("AnT - " + name):
+            if map_name in expected_name or map_name in ("AnT - " + expected_name):
+                ok = True
+
+            # replace prefix like "RBW4 - " or "HC3 - " to "AnT - " and check again
+            elif map_name in re.sub(r'[a-zA-Z0-9]{,4} - ', 'AnT - ', expected_name):
                 ok = True
 
         if not ok:
-            return error(f"Mapa {match_info['map_name']} jest spoza podanej puli: {', '.join(expected_maps)}.")
+            return error(f"Mapa {map_name} jest spoza podanej puli: {', '.join(expected_maps)}.")
 
     db.execute('BEGIN')
     res = db.execute(
