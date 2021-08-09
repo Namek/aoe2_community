@@ -31,6 +31,7 @@ class Match(Base):
     best_of = Column(Integer)
     p0_civ_bans = Column(String)
     p1_civ_bans = Column(String)
+    watched = Column(Integer)
 
     recordings = relationship("Recording", secondary="matches_recordings",
                               back_populates="match", order_by="asc(AssocMatchesRecordings.order)")

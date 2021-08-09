@@ -1,3 +1,4 @@
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 from typing import (List, Optional)
 
@@ -31,3 +32,17 @@ def get_matches(db: Session) -> List[schemas.MatchOut]:
         match.p1_civ_bans = match.p1_civ_bans.split('||') if match.p1_civ_bans else []
 
     return matches
+
+
+def get_match(db: Session, id: int) -> models.Match:
+    return db.query(models.Match).filter(models.Match.id == id).first()
+
+
+def patch_match(db: Session, match_id: int, values: schemas.MatchPatch):
+    patch = values.dict(exclude_unset=True)
+    db.execute(
+        update(models.Match).
+        where(models.Match.id == match_id).
+        values(**patch)
+    )
+    db.commit()

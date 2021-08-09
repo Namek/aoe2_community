@@ -21,25 +21,26 @@ store Matches {
 
       next { matches = Debug.log(matches) }
 
-      App.setLoading(false)
+      matches
     } catch Http.ErrorResponse => error {
       try {
-        next
-          {
-            matches =
-              Maybe::Just(
-                Result.error(
-                  case (error.type) {
-                    Http.Error::NetworkError =>
-                      "Błąd połączenia z serwerem."
+        matches =
+          Maybe::Just(
+            Result.error(
+              case (error.type) {
+                Http.Error::NetworkError =>
+                  "Błąd połączenia z serwerem."
 
-                    => "Wewnętrzny błąd serwera."
-                  }
-                  |> Debug.log))
-          }
+                => "Wewnętrzny błąd serwera."
+              }
+              |> Debug.log))
 
-        App.setLoading(false)
+        next { matches = matches }
+
+        matches
       }
+    } finally {
+      App.setLoading(false)
     }
   }
 
@@ -75,6 +76,61 @@ store Matches {
       App.setLoading(false)
     }
   }
+
+  fun toggleWatched (match : Match) {
+    sequence {
+      refreshList()
+
+      updatedMatches =
+        (matches or Result::Ok([]))
+        |> Result.withDefault([])
+
+      case (Array.find((m : Match) { m.id == match.id }, updatedMatches)) {
+        Maybe::Just(updatedMatch) =>
+          sequence {
+            patch =
+              { watched = !updatedMatch.watched }
+
+            response =
+              Http.empty()
+              |> Http.url("#{@ENDPOINT}/api/match/#{match.id}")
+              |> Http.method("PATCH")
+              |> Http.withCredentials(true)
+              |> Http.jsonBody(encode patch)
+              |> Http.send()
+
+            next
+              {
+                matches =
+                  updatedMatches
+                  |> Array.map(
+                    (m : Match) {
+                      if (m.id == match.id) {
+                        { m | watched = patch.watched }
+                      } else {
+                        m
+                      }
+                    })
+                  |> Result.ok
+                  |> Maybe.just
+              }
+
+            void
+          } catch Http.ErrorResponse => error {
+            sequence {
+              `alert("Sromotna klęska: " + JSON.stringify(#{error}))`
+            }
+          }
+
+        =>
+          try {
+            `alert("Mecz zniknął z listy.")`
+          }
+      }
+
+      void
+    }
+  }
 }
 
 record Match {
@@ -91,7 +147,12 @@ record Match {
   p1Maps : Array(String) using "p1_maps",
   p0CivBans : Array(String) using "p0_civ_bans",
   p1CivBans : Array(String) using "p1_civ_bans",
-  recordings : Array(Recording)
+  recordings : Array(Recording),
+  watched : Bool
+}
+
+record MatchPatch {
+  watched : Bool
 }
 
 record Recording {
@@ -203,6 +264,18 @@ component Page.Matches {
 
                         if (App.hasAdminRole) {
                           <td>
+                            <label class="checkbox">
+                              <input
+                                type="checkbox"
+                                checked={match.watched}
+                                onChange={(evt : Html.Event) { Matches.toggleWatched(match) }}/>
+
+                              " Skomentowane"
+                            </label>
+
+                            <br/>
+                            <br/>
+
                             <button
                               class="button is-danger is-small"
                               onClick={() { Matches.deleteMatch(match) }}>

@@ -176,10 +176,11 @@ def post_match(
         p1_maps='||'.join(new_match.p1_maps),
         p0_civ_bans='||'.join(new_match.p0_civ_bans) if new_match.p0_civ_bans else None,
         p1_civ_bans='||'.join(new_match.p1_civ_bans) if new_match.p1_civ_bans else None,
-        upload_user_id=user.id
+        upload_user_id=user.id,
+        watched=False
     ))
 
-    ret = db.add(db_match)
+    db.add(db_match)
     db.flush()
     db.refresh(db_match)
 
@@ -240,6 +241,11 @@ def post_match(
     else:
         db.rollback()
         raise HTTPException(500)
+
+
+@app.patch("/api/match/{match_id}")
+def patch_match(match_id: int, patch: schemas.MatchPatch, db: Session = Depends(get_db), user: models.User = Depends(get_current_admin_user)):
+    crud.patch_match(db, match_id, patch)
 
 
 @app.get('/api/matches', response_model=List[schemas.MatchOut])
