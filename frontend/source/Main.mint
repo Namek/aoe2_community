@@ -106,7 +106,16 @@ component Main {
                   type="password"
                   class="input"
                   name="password"
-                  placeholder="Twoje prywatne hasło"/>
+                  placeholder="Twoje prywatne hasło"
+                  onKeyDown={
+                    (evt : Html.Event) {
+                      if (evt.keyCode == 13) {
+                        logIn()
+                      } else {
+                        Promise.never()
+                      }
+                    }
+                  }/>
               </section>
 
               <footer class="modal-card-foot is-justify-content-flex-end">
