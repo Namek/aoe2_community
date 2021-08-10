@@ -107,6 +107,7 @@ component Main {
                   class="input"
                   name="password"
                   placeholder="Twoje prywatne hasło"
+                  autofocus="autofocus"
                   onKeyDown={
                     (evt : Html.Event) {
                       if (evt.keyCode == 13) {
