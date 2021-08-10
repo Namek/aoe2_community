@@ -17,10 +17,12 @@ COPY backend/requirements.txt .
 COPY backend/mgz ./mgz
 RUN pip install -r requirements.txt --no-cache-dir
 COPY --from=build-frontend /app/dist ./static
-COPY backend/database/app.template.db ./database/
-RUN false | cp -i ./database/app.template.db ./database/app.db
+COPY backend/database/app.template.db ./database/app.template.db
+# RUN false | cp -i ./database/app.template.db ./database/app.db
 COPY backend/*.py ./
+COPY backend/src/*.py ./src/
 
 EXPOSE 8080
 STOPSIGNAL SIGTERM
-ENTRYPOINT [ "python3", "/app/main.py" ]
+WORKDIR "/app"
+ENTRYPOINT [ "python3", "-m", "main.py" ]

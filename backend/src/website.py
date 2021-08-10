@@ -52,7 +52,7 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
 
 
 def get_current_admin_user(request: Request, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
-    if user.roles != ROLE_ADMIN:
+    if not user or user.roles != ROLE_ADMIN:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Nie można!")
     return user
 

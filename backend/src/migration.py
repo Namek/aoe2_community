@@ -1,5 +1,6 @@
 from pathlib import Path
 import sqlite3
+import sys
 
 from . import cfg, utils
 
@@ -34,7 +35,7 @@ def migrate(db_path):
 
 
 def block(ctx, fn):
-    if ctx['version'] == ctx['block_index']:
+    if ctx['version'] <= ctx['block_index']:
         print(f"Running migration {ctx['block_index'] + 1}")
         db = ctx['db']
         cursor = db.cursor()
@@ -44,11 +45,11 @@ def block(ctx, fn):
             ctx['version'] += 1
             cursor.execute('DELETE FROM migration')
             cursor.execute('INSERT INTO migration (version) VALUES (?)', [ctx['version']])
+            db.commit()
         except:
             print(f"Error migrating from {ctx['version']}")
             db.rollback()
-        finally:
-            db.commit()
+            sys.exit(1)
 
     ctx['block_index'] += 1
 

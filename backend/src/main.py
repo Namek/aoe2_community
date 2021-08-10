@@ -8,10 +8,14 @@ import uvicorn
 
 from . import cfg, migration, utils
 
+print(f'current dir: {os.getcwd()}')
+
 if not Path(cfg.DB_PATH).exists():
+    print(f'Database file {cfg.DB_PATH} to be copied from {cfg.DB_TEMPLATE_PATH}...')
     with open(cfg.DB_PATH, 'wb') as fp:
         with open(cfg.DB_TEMPLATE_PATH, 'rb') as source:
             utils.copy_file(source, fp)
+    print('Database copied.')
 
 if not Path(cfg.DB_PATH).exists():
     print("Database file '{}' does not exist!".format(cfg.DB_PATH))

@@ -24,8 +24,8 @@ class MatchBase(BaseModel):
     p1_name: str
     p0_maps: List[str]
     p1_maps: List[str]
-    p0_map_ban: str
-    p1_map_ban: str
+    p0_map_ban: Optional[str]
+    p1_map_ban: Optional[str]
     p0_civ_bans: Optional[List[str]] = None
     p1_civ_bans: Optional[List[str]] = None
 
