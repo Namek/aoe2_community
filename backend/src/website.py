@@ -291,6 +291,8 @@ def get_match_recording(match_id: int, rec_id: int, db: Session = Depends(get_db
 
 
 @app.get('/', response_class=FileResponse)
+@app.get('/admin', response_class=FileResponse)
+@app.get('/logout', response_class=FileResponse)
 def index():
     return FileResponse(os.path.join(cfg.STATICS_PATH, 'index.html'))
 
