@@ -112,6 +112,9 @@ def post_match(
 
     is_admin = int(user.roles) == ROLE_ADMIN
 
+    if new_match.civ_draft:
+        new_match.civ_draft = new_match.civ_draft.replace('https://aoe2cm.net/draft/', '')
+
     # check duplicates of civ bans
     if new_match.p0_civ_bans:
         if len(set(new_match.p0_civ_bans)) != len(new_match.p0_civ_bans) or len(set(new_match.p1_civ_bans)) != len(new_match.p1_civ_bans):
