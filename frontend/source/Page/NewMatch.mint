@@ -60,6 +60,7 @@ component Page.NewMatch {
     [
       "Aztecs",
       "Berbers",
+      "Bohemians",
       "Britons",
       "Bulgarians",
       "Burgundians",
@@ -85,6 +86,7 @@ component Page.NewMatch {
       "Mayans",
       "Mongols",
       "Persians",
+      "Poles",
       "Portuguese",
       "Saracens",
       "Sicilians",
