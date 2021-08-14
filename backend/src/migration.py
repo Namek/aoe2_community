@@ -32,6 +32,7 @@ def migrate(db_path):
         block(ctx, ver5)
         block(ctx, ver6)
         block(ctx, ver7)
+        block(ctx, ver8)
 
 
 def block(ctx, fn):
@@ -131,3 +132,7 @@ def ver6(c):
 
 def ver7(c):
     c.execute('ALTER TABLE matches ADD "watched" INT DEFAULT 0 NOT NULL')
+
+
+def ver8(c):
+    c.execute('ALTER TABLE matches RENAME COLUMN "watched" TO "watch_status"')

@@ -1,5 +1,7 @@
+import enum
+from collections import OrderedDict
 from functools import partial
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
+from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -12,6 +14,12 @@ class User(Base):
     name = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     roles = Column(Integer, default=0, nullable=False)
+
+
+class WatchStatus:
+    UNTOUCHED = 0
+    COMMENTED = 1
+    WATCHED = 2
 
 
 class Match(Base):
@@ -31,7 +39,7 @@ class Match(Base):
     best_of = Column(Integer)
     p0_civ_bans = Column(String)
     p1_civ_bans = Column(String)
-    watched = Column(Integer)
+    watch_status = Column(Integer, default=WatchStatus.UNTOUCHED)
 
     recordings = relationship("Recording", secondary="matches_recordings",
                               back_populates="match", order_by="asc(AssocMatchesRecordings.order)")

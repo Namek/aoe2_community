@@ -16,6 +16,7 @@
 *.py[cod]
 Bin/
 Lib/
+Include/
 Scripts/
 pyvenv.cfg
 .venv

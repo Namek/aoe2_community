@@ -1,4 +1,8 @@
 store Matches {
+  const WATCH_STATUS_UNTOUCHED = 0
+  const WATCH_STATUS_WATCHED = 1
+  const WATCH_STATUS_COMMENTED = 2
+
   state matches : Maybe(Result(String, Array(Match))) = Maybe::Nothing
 
   fun refreshList {
@@ -77,7 +81,7 @@ store Matches {
     }
   }
 
-  fun toggleWatched (match : Match) {
+  fun setWatchStatus (match : Match, newStatus : Number) {
     sequence {
       refreshList()
 
@@ -89,7 +93,7 @@ store Matches {
         Maybe::Just(updatedMatch) =>
           sequence {
             patch =
-              { watched = !updatedMatch.watched }
+              { watchStatus = newStatus }
 
             response =
               Http.empty()
@@ -106,7 +110,7 @@ store Matches {
                   |> Array.map(
                     (m : Match) {
                       if (m.id == match.id) {
-                        { m | watched = patch.watched }
+                        { m | watchStatus = patch.watchStatus }
                       } else {
                         m
                       }
@@ -148,11 +152,11 @@ record Match {
   p0CivBans : Array(String) using "p0_civ_bans",
   p1CivBans : Array(String) using "p1_civ_bans",
   recordings : Array(Recording),
-  watched : Bool
+  watchStatus : Number using "watch_status"
 }
 
 record MatchPatch {
-  watched : Bool
+  watchStatus : Number using "watch_status"
 }
 
 record Recording {
@@ -228,9 +232,7 @@ component Page.Matches {
                       <th>"Draft"</th>
                       <th>"Nagrania"</th>
 
-                      if (App.hasAdminRole) {
-                        <th/>
-                      }
+                      <th>"Status"</th>
                     </tr>
                   </thead>
 
@@ -262,29 +264,54 @@ component Page.Matches {
                           }
                         </td>
 
-                        if (App.hasAdminRole) {
-                          <td>
-                            <label class="checkbox">
-                              <input
-                                type="checkbox"
-                                checked={match.watched}
-                                onChange={(evt : Html.Event) { Matches.toggleWatched(match) }}/>
+                        <td>
+                          if (App.hasAdminRole) {
+                            <>
+                              <div class="select">
+                                <select
+                                  value={Number.toString(match.watchStatus)}
+                                  onChange={
+                                    (evt : Html.Event) {
+                                      Matches.setWatchStatus(match, `+#{evt.target}.value`)
+                                    }
+                                  }>
 
-                              " Skomentowane"
-                            </label>
+                                  <option value={Number.toString(Matches:WATCH_STATUS_UNTOUCHED)}>
+                                    "❌ Nietknięty"
+                                  </option>
 
-                            <br/>
-                            <br/>
+                                  <option value={Number.toString(Matches:WATCH_STATUS_WATCHED)}>
+                                    "👀 Obejrzany"
+                                  </option>
 
-                            <button
-                              class="button is-danger is-small"
-                              onClick={() { Matches.deleteMatch(match) }}>
+                                  <option value={Number.toString(Matches:WATCH_STATUS_COMMENTED)}>
+                                    "📺 Skomentowany"
+                                  </option>
 
-                              <span>"Usuń mecz"</span>
+                                </select>
+                              </div>
 
-                            </button>
-                          </td>
-                        }
+                              <br/>
+                              <br/>
+
+                              <button
+                                class="button is-danger is-small"
+                                onClick={() { Matches.deleteMatch(match) }}>
+
+                                <span>"Usuń mecz"</span>
+
+                              </button>
+                            </>
+                          } else {
+                            <span>
+                              case (match.watchStatus) {
+                                1 => "👀 Obejrzany"
+                                2 => "📺 Skomentowany"
+                                => ""
+                              }
+                            </span>
+                          }
+                        </td>
                       </tr>
                     }
                   </tbody>

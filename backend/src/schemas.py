@@ -37,11 +37,11 @@ class MatchIn(MatchBase):
 
 class MatchOut(MatchBase):
     id: int
-    watched: bool
+    watch_status: int
     recordings: List[RecordingOut]
 
     class Config:
         orm_mode = True
 
 class MatchPatch(BaseModel):
-    watched: Optional[int]
+    watch_status: Optional[int]

@@ -180,7 +180,7 @@ def post_match(
         p0_civ_bans='||'.join(new_match.p0_civ_bans) if new_match.p0_civ_bans else None,
         p1_civ_bans='||'.join(new_match.p1_civ_bans) if new_match.p1_civ_bans else None,
         upload_user_id=user.id,
-        watched=False
+        watch_status=models.WatchStatus.UNTOUCHED
     ))
 
     db.add(db_match)
