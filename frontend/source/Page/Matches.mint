@@ -2,6 +2,7 @@ store Matches {
   const WATCH_STATUS_UNTOUCHED = 0
   const WATCH_STATUS_WATCHED = 1
   const WATCH_STATUS_COMMENTED = 2
+  const WATCH_STATUS_WATCHED_AND_NOTED = 3
 
   state matches : Maybe(Result(String, Array(Match))) = Maybe::Nothing
 
@@ -284,6 +285,10 @@ component Page.Matches {
                                     "👀 Obejrzany"
                                   </option>
 
+                                  <option value={Number.toString(Matches:WATCH_STATUS_WATCHED_AND_NOTED)}>
+                                    "📝 Wpisany"
+                                  </option>
+
                                   <option value={Number.toString(Matches:WATCH_STATUS_COMMENTED)}>
                                     "📺 Skomentowany"
                                   </option>
@@ -305,8 +310,9 @@ component Page.Matches {
                           } else {
                             <span>
                               case (match.watchStatus) {
-                                1 => "👀 Obejrzany"
-                                2 => "📺 Skomentowany"
+                                Matches:WATCH_STATUS_WATCHED => "👀 Obejrzany"
+                                Matches:WATCH_STATUS_WATCHED_AND_NOTED => "📝 Wpisany"
+                                Matches:WATCH_STATUS_COMMENTED => "📺 Skomentowany"
                                 => ""
                               }
                             </span>

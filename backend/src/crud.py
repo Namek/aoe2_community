@@ -39,6 +39,9 @@ def get_match(db: Session, id: int) -> models.Match:
 
 
 def patch_match(db: Session, match_id: int, values: schemas.MatchPatch):
+    if values.watch_status and (values.watch_status not in models.WatchStatus.values()):
+        raise ValueError('invalid watch_status')
+
     patch = values.dict(exclude_unset=True)
     db.execute(
         update(models.Match).

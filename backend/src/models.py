@@ -16,10 +16,15 @@ class User(Base):
     roles = Column(Integer, default=0, nullable=False)
 
 
-class WatchStatus:
+class WatchStatus(enum.IntEnum):
     UNTOUCHED = 0
     COMMENTED = 1
     WATCHED = 2
+    WATCHED_AND_NOTED = 3
+
+    @classmethod
+    def values(cls):
+        return [m.value for _, m in cls.__members__.items()]
 
 
 class Match(Base):
@@ -39,7 +44,7 @@ class Match(Base):
     best_of = Column(Integer)
     p0_civ_bans = Column(String)
     p1_civ_bans = Column(String)
-    watch_status = Column(Integer, default=WatchStatus.UNTOUCHED)
+    watch_status = Column(Integer, nullable=False, default=WatchStatus.UNTOUCHED)
 
     recordings = relationship("Recording", secondary="matches_recordings",
                               back_populates="match", order_by="asc(AssocMatchesRecordings.order)")
