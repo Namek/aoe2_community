@@ -21,7 +21,7 @@ store Matches {
         |> Maybe.map(
           (json : Object) {
             decode json as Array(Match)
-            |> Result.mapError((err : Object.Error) { "Błąd dekodowania." })
+            |> Result.mapError((err : Object.Error) { "Błąd dekodowania listy meczy." })
           })
 
       next { matches = Debug.log(matches) }

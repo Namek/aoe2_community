@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 import os
 import sys
@@ -7,6 +8,7 @@ import threading
 import uvicorn
 
 from . import cfg, migration, utils
+
 
 print(f'current dir: {os.getcwd()}')
 
@@ -36,22 +38,26 @@ class Server(uvicorn.Server):
 
 
 def run_website():
-    from .website import app as webapp
+    def launch():
+        if cfg.ENABLE_WEBSITE:
+            from .website import app as webapp
 
-    config = uvicorn.Config(webapp, host='0.0.0.0', port=8080)
-    server = Server(config=config)
+            config = uvicorn.Config(webapp, host='0.0.0.0', port=8080)
+            server = Server(config=config)
+            server.run()
 
-    thread = threading.Thread(target=server.run, daemon=True)
+    thread = threading.Thread(target=launch, daemon=True)
     thread.start()
     return thread
 
 
 def run_discord_bot():
-    def launch():
+    async def launch():
         if cfg.ENABLE_DISCORD_BOT:
-            from . import discord_bot
+            from .discord_bot.connection import start_server
+            await start_server()
 
-    thread = threading.Thread(target=launch, daemon=True)
+    thread = threading.Thread(target=asyncio.run, args=(launch(),), daemon=True)
     thread.start()
     return thread
 

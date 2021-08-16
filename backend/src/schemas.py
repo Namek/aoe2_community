@@ -1,8 +1,10 @@
-from typing_extensions import ParamSpecArgs
-from fastapi.datastructures import UploadFile
+import datetime
+from typing import List, Optional
+
 from fastapi import Body, File, Form
+from fastapi.datastructures import UploadFile
 from pydantic import BaseModel
-from typing import (List, Optional)
+from typing_extensions import ParamSpecArgs
 
 from .utils import as_form
 
@@ -45,3 +47,13 @@ class MatchOut(MatchBase):
 
 class MatchPatch(BaseModel):
     watch_status: Optional[int]
+
+
+class CalendarEntry(BaseModel):
+    id: int
+    datetime: datetime.datetime
+    description: str
+    source_id: int
+
+    class Config:
+        orm_mode = True

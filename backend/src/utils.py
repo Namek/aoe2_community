@@ -81,3 +81,16 @@ def as_form(cls: Type[BaseModel]):
     _as_form.__signature__ = sig
     setattr(cls, "as_form", _as_form)
     return cls
+
+
+def pick_one(elements, predicate):
+    new_list = []
+
+    for i, el in enumerate(elements):
+        if predicate(el):
+            rest = new_list + elements[(i + 1):]
+            return el, rest
+        else:
+            new_list.append(el)
+
+    return None, new_list

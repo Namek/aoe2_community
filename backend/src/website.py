@@ -14,9 +14,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 
 from . import cfg, crud, models, schemas, utils
-from .database import SessionLocal, engine
-
-# models.Base.metadata.create_all(bind=engine)
+from .database import web_db as get_db
 
 ROLE_ADMIN = 1
 
@@ -32,17 +30,6 @@ if cfg.CORS_ALLOW_ORIGIN:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    except Exception as e:
-        db.rollback()
-        raise e
-    finally:
-        db.close()
 
 
 def get_current_user(request: Request, db: Session = Depends(get_db)):
@@ -248,6 +235,7 @@ def post_match(
 @app.patch("/api/match/{match_id}")
 def patch_match(match_id: int, patch: schemas.MatchPatch, db: Session = Depends(get_db), user: models.User = Depends(get_current_admin_user)):
     crud.patch_match(db, match_id, patch)
+    db.commit()
 
 
 @app.get('/api/matches', response_model=List[schemas.MatchOut])
@@ -270,7 +258,7 @@ def get_matches(db: Session = Depends(get_db)):
 
 @app.get('/api/match/{match_id}/recording/{rec_id}', response_class=FileResponse)
 def get_match_recording(match_id: int, rec_id: int, db: Session = Depends(get_db)):
-    match = db.query(models.Match).filter(models.Match.id == match_id).first()
+    match: models.Match = db.query(models.Match).filter(models.Match.id == match_id).first()
     recordings = match.recordings
     match_date = datetime.datetime.fromtimestamp(match.date).strftime('%Y-%m-%d')
 
@@ -291,6 +279,10 @@ def get_match_recording(match_id: int, rec_id: int, db: Session = Depends(get_db
 
     return FileResponse(path=path, filename=download_filename)
 
+
+@app.get('/api/calendar', response_model=List[schemas.CalendarEntry])
+def get_calendar_entries(db: Session = Depends(get_db)):
+    return crud.get_calendar_entries(db)
 
 @app.get('/', response_class=FileResponse)
 @app.get('/admin', response_class=FileResponse)

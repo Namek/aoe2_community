@@ -1,91 +1,8 @@
-record Event {
-  time : String,
-  name : String
-}
-
-store Calendar {
-  state allMonthNames = ["Sty", "Lut", "Mar", "Kwi", "Maj", "Cze", "Lip", "Sie", "Wrz", "Paź", "Lis", "Gru"]
-
-  state currentMonth = 0
-  state currentYear = 0
-  state today = Time.today()
-
-  state daysData : Map(String, Array(Event)) = Map.empty()
-  |> Map.set("28-3-2021", [Event("17:00", "Ants Green: GraczA vs graczB"), Event("18:00", "Ants Green: GraczA vs graczB"), Event("20:00", "Ants Green: GraczA vs graczB")])
-
-  fun init {
-    try {
-      today =
-        Time.today()
-
-      next
-        {
-          currentMonth = Debug.log(Time.monthNum(today)),
-          currentYear = Time.year(today),
-          today = today
-        }
-    }
-  }
-
-  fun setPrevMonth {
-    try {
-      newMonth =
-        Time.previousMonth(Time.from(currentYear, currentMonth, 1))
-
-      next
-        {
-          currentYear = Debug.log(Time.year(newMonth)),
-          currentMonth = Debug.log(Time.monthNum(newMonth))
-        }
-    }
-  }
-
-  fun setNextMonth {
-    try {
-      newMonth =
-        Debug.log(Time.nextMonth(Time.from(currentYear, currentMonth, 1)))
-
-      next
-        {
-          currentYear = Time.year(newMonth),
-          currentMonth = Time.monthNum(newMonth)
-        }
-    }
-  }
-
-  fun daysInMonth (monthIndex : Number, year : Number) {
-    `32 - new Date(#{year}, #{monthIndex}, 32).getDate()`
-  }
-
-  fun lastDaysFromPreviousMonth (curMonthNumber : Number, year : Number) : Array(Number) {
-    try {
-      curMonth =
-        Time.from(year, curMonthNumber, 1)
-
-      prevMonth =
-        Time.previousMonth(curMonth)
-
-      dayCount =
-        daysInMonth(Time.monthNum(prevMonth) - 1, Time.year(prevMonth))
-
-      firstDayThisMonth =
-        `#{Time.startOf("month", curMonth)}.getDay()`
-
-      if (firstDayThisMonth == 1) {
-        []
-      } else {
-        Array.range(dayCount - firstDayThisMonth + 2, dayCount)
-      }
-    }
-  }
-
-  fun hashDate (day : Number, month : Number, year : Number) {
-    "#{day}-#{month}-#{year}"
-  }
-}
-
 component Page.Calendar {
-  connect Calendar exposing { allMonthNames, today, currentMonth, currentYear }
+  const MONTH_NAMES = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"]
+  const DAY_NAMES = ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"]
+
+  connect Calendar exposing { today, currentMonth, currentYear }
 
   style app {
     justify-content: center;
@@ -125,6 +42,7 @@ component Page.Calendar {
     padding: 5px;
     border-bottom: 1px solid black;
     border-right: 1px solid black;
+    overflow: hidden;
 
     &:nth-child(7n + 1) {
       border-left: 1px solid black;
@@ -162,14 +80,26 @@ component Page.Calendar {
     font-weight: bold;
   }
 
-  style event {
+  style event (colorId : number) {
     font-size: 0.8em;
-    background-color: green;
+
+    if (colorId == 1) {
+      background-color: #334A61;
+    } else {
+      background-color: #476787;
+    }
+
     border-radius: 3px;
     color: white;
     padding: 0 3px;
     margin-bottom: 3px;
     font-weight: normal;
+    white-space: pre-wrap;
+  }
+
+  style eventTime {
+    color: #ddd;
+    float: left;
   }
 
   fun componentDidMount {
@@ -187,7 +117,7 @@ component Page.Calendar {
 
       <div::app>
         <div::currentMonth>
-          <{ "#{allMonthNames[currentMonth - 1] or ""} #{currentYear}" }>
+          <{ "#{MONTH_NAMES[currentMonth - 1] or ""} #{currentYear}" }>
 
           <div>
             <button onClick={Calendar.setPrevMonth}>
@@ -201,7 +131,7 @@ component Page.Calendar {
         </div>
 
         <div::month>
-          for (day of ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"]) {
+          for (day of DAY_NAMES) {
             <div::name>
               <{ day }>
             </div>
@@ -244,7 +174,13 @@ component Page.Calendar {
 
       <div>
         for (evt of events) {
-          <div::event>"#{evt.time}: #{evt.name}"</div>
+          <div::event(evt.sourceId)>
+            <span::eventTime>
+              <{ Time.format("HH:ss", evt.datetime) }>
+            </span>
+
+            "#{evt.name}"
+          </div>
         }
       </div>
     }

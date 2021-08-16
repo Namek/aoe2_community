@@ -4,8 +4,13 @@ import sys
 
 from . import cfg, utils
 
+# TODO a more automated migration system, based on sqlalchemy and alembic?
+# from .database import get_db, engine
+# models.Base.metadata.create_all(bind=engine)
+
 
 def migrate(db_path):
+    print(f'Migration: opening "{db_path}"')
     with sqlite3.connect(db_path) as db:
         c = db.cursor()
         c.execute('BEGIN')
@@ -33,6 +38,7 @@ def migrate(db_path):
         block(ctx, ver6)
         block(ctx, ver7)
         block(ctx, ver8)
+        block(ctx, ver9)
 
 
 def block(ctx, fn):
@@ -47,8 +53,9 @@ def block(ctx, fn):
             cursor.execute('DELETE FROM migration')
             cursor.execute('INSERT INTO migration (version) VALUES (?)', [ctx['version']])
             db.commit()
+            print(f"Migration {ctx['block_index'] + 1} committed.")
         except:
-            print(f"Error migrating from {ctx['version']}")
+            print(f"Error migrating from {ctx['version']}:")
             db.rollback()
             sys.exit(1)
 
@@ -136,3 +143,44 @@ def ver7(c):
 
 def ver8(c):
     c.execute('ALTER TABLE matches RENAME COLUMN "watched" TO "watch_status"')
+
+
+def ver9(c):
+    # stuff for discord bot
+    c.execute('''
+        CREATE TABLE "message_sources" (
+            "id"            INTEGER NOT NULL,
+            "guild_id"      INTEGER NOT NULL,
+            "channel_id"    INTEGER NOT NULL,
+            "channel_name"  TEXT NOT NULL,
+            "created_at"    DATETIME DEFAULT CURRENT_TIMESTAMP,
+            "modified_at"    DATETIME DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY("id" AUTOINCREMENT)
+        );
+    ''')
+
+    c.execute('CREATE UNIQUE INDEX message_sources_idx on message_sources(guild_id, channel_id)')
+
+    c.execute('''
+        CREATE TABLE "messages" (
+            "id"            INTEGER NOT NULL,
+            "content"       TEXT NOT NULL,
+            "source_id"     INTEGER NOT NULL,
+            "original_id"   TEXT NOT NULL,
+            "is_parsed"     INTEGER NOT NULL DEFAULT 0,
+            "created_at"    DATETIME DEFAULT CURRENT_TIMESTAMP,
+            "modified_at"    DATETIME DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY("id" AUTOINCREMENT)
+        );
+    ''')
+    c.execute('''
+        CREATE TABLE "calendar" (
+            "id"            INTEGER NOT NULL,
+            "datetime"      DATETIME NOT NULL,
+            "description"   TEXT NOT NULL,
+            "message_id"    INTEGER,
+            "created_at"    DATETIME DEFAULT CURRENT_TIMESTAMP,
+            "modified_at"    DATETIME DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY("id" AUTOINCREMENT)
+        );
+    ''')

@@ -7,7 +7,7 @@ services:
       - "0.0.0.0:8081:8080"
     restart: always
     volumes:
-      - appdb:/app/database
+      - appdb:/app/backend/database
     environment:
       - PYTHONUNBUFFERED=1
 

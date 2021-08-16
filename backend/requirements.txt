@@ -1,9 +1,16 @@
 aiofiles==0.7.0
+discord.py==1.7.1
 fastapi==0.68.0
 itsdangerous==2.0.1
+mypy>=0.910
+python-dateutil==2.8.2
 python-dotenv==0.17.0
 python-multipart==0.0.5
-sqlalchemy==1.4.22
+sqlalchemy>=1.4.22
+sqlalchemy2-stubs>=0.0.2a13
 uvicorn==0.14.0
 
 -e ./mgz
+
+pytest==6.2.4
+pytest-only==1.2.2

@@ -1,8 +1,10 @@
+from datetime import datetime as dt
 import enum
 from collections import OrderedDict
 from functools import partial
-from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, String, Table
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+from typing import List
 
 from .database import Base
 
@@ -87,3 +89,37 @@ class AssocRecordingsPlayers(Base):
     name = Column(String, nullable=False)
     civ = Column(String, nullable=False)
     team_index = Column(Integer, nullable=False)
+
+
+class MessageSource(Base):
+    __tablename__ = 'message_sources'
+
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    guild_id = Column(Integer, nullable=False)
+    channel_id = Column(Integer, nullable=False)
+    channel_name = Column(String, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=dt.now)
+    modified_at = Column(DateTime, nullable=False, default=dt.now, onupdate=dt.now)
+
+
+class Message(Base):
+    __tablename__ = 'messages'
+
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    original_id = Column(Integer, index=True)
+    source_id = Column(ForeignKey('message_sources.id'), nullable=False)
+    content = Column(String, nullable=False)
+    is_parsed = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, nullable=False, default=dt.now)
+    modified_at = Column(DateTime, nullable=False, default=dt.now, onupdate=dt.now)
+
+
+class CalendarEntry(Base):
+    __tablename__ = 'calendar'
+
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    message_id = Column(Integer, nullable=False, index=True)
+    datetime = Column(DateTime, nullable=False)
+    description = Column(String, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=dt.now)
+    modified_at = Column(DateTime, nullable=False, default=dt.now, onupdate=dt.now)
