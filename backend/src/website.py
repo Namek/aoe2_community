@@ -135,7 +135,6 @@ def post_match(
 
     recordings = []
     for idx, file in enumerate(recording_files):
-        match_info = utils.get_match_info(file.file)
         try:
             match_info = utils.get_match_info(file.file)
             recordings.append((file, match_info, recording_times[idx]))
