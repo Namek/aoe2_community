@@ -146,7 +146,7 @@ def post_match(
     # check duplicates by map names
     map_names = [r[1]['map_name']
                  for r in recordings if r[1]['start_time_seconds'] <= 5]
-    if len(set(map_names)) != len(recordings):
+    if len(set(map_names)) > len(recordings):
         raise HTTPException(500, detail=f'Powtórzono mapy: {", ".join(map_names)}')
 
     # verify whether all the given recordings match the maps
