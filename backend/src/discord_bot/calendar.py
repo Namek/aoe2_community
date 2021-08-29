@@ -99,11 +99,11 @@ async def process_message(client: discord.Client, db: DbSession, message: discor
     db_msg = crud.get_message_by_original_id(db, str(message.id))
     is_content_new = not db_msg or db_msg.content != text
 
-    if not is_content_new:
+    if not is_content_new and (db_msg and db_msg.is_parsed):
         return
 
     parsed = analyze_message_content(text, message.created_at)
-    is_parsed = bool(parsed)
+    is_parsed = parsed and parsed.datetime and parsed.content
 
     db_channel = crud.get_or_create_message_source(db, channel.guild.id, channel.id, channel.name)
 
@@ -120,6 +120,8 @@ async def process_message(client: discord.Client, db: DbSession, message: discor
     if parsed and parsed.datetime and parsed.content:
         calendar_entry_text = parsed.group.strip() + " Ants\n" + " vs ".join([v.strip() for v in parsed.vs]) \
             if parsed.vs and parsed.group else parsed.content
+
+        await message.add_reaction('📅')
 
         if not db_calendar:
             db_calendar = models.CalendarEntry(
@@ -146,6 +148,8 @@ async def process_message(client: discord.Client, db: DbSession, message: discor
             author = cast(discord.User, message.author)
             dm_channel: discord.DMChannel = author.dm_channel or await author.create_dm()
             await dm_channel.send(content=fix_request_message)
+
+        await message.remove_reaction('📅', client.user)
 
     db.commit()
 
