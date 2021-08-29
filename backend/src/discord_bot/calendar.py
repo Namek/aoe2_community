@@ -18,7 +18,7 @@ async def process_message(client: discord.Client, db: DbSession, message: discor
         print('ignoring pinned message')
         return
 
-    db_msg = crud.get_message_by_original_id(db, str(message.id))
+    db_msg = crud.get_message_by_original_id(db, message.id)
     is_content_new = not db_msg or db_msg.content != text
 
     if not is_content_new and (db_msg and db_msg.is_parsed == 1):
@@ -78,7 +78,9 @@ async def process_message(client: discord.Client, db: DbSession, message: discor
 
 
 def delete_message(client: discord.Client, db: DbSession, message: discord.Message, channel: discord.TextChannel):
-    db_msg = crud.get_message_by_original_id(db, str(message.id))
+    print(f'deleting a message: {message.clean_content}')
+
+    db_msg = crud.get_message_by_original_id(db, message.id)
 
     if db_msg:
         crud.delete_message_with_calendar_entries(db, db_msg.id)

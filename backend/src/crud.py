@@ -56,7 +56,7 @@ def patch_match(db: DbSession, match_id: int, values: schemas.MatchPatch):
     db.flush()
 
 
-def get_message_by_original_id(db: DbSession, id: str) -> Message:
+def get_message_by_original_id(db: DbSession, id: int) -> Message:
     query = select(Message).where(Message.original_id == id).limit(1)
     return db.execute(query).scalars().one_or_none()
 

@@ -37,30 +37,31 @@ async def on_ready():
                 await calendar.process_message(client, db, message, message.channel)
 
 
+def is_message_from_configured_channels(message: discord.Message) -> bool:
+    channel = message.channel
+    return channel.type == discord.ChannelType.text and\
+        channel.name in cfg.DISCORD_SERVER_CHANNEL_NAMES and\
+        message.guild.id == cfg.DISCORD_SERVER_ID
+
 @client.event
 async def on_message(message: discord.Message):
-    channel = message.channel
-    if channel.type == discord.ChannelType.text and channel.name in cfg.DISCORD_SERVER_CHANNEL_NAMES:
+    if is_message_from_configured_channels(message):
         with get_db() as db:
-            await calendar.process_message(client, db, message, channel)
+            await calendar.process_message(client, db, message, message.channel)
 
 
 @client.event
 async def on_message_edit(before, after):
-    channel = after.channel
-
-    if after.channel.type == discord.ChannelType.text and channel.name in cfg.DISCORD_SERVER_CHANNEL_NAMES:
+    if is_message_from_configured_channels(after):
         with get_db() as db:
-            await calendar.process_message(client, db, after, channel)
+            await calendar.process_message(client, db, after, after.channel)
 
 
 @client.event
 async def on_message_delete(message):
-    channel = message.channel
-
-    if channel.type == discord.ChannelType.text and channel.name in cfg.DISCORD_SERVER_CHANNEL_NAMES:
+    if is_message_from_configured_channels(message):
         with get_db() as db:
-            calendar.delete_message(client, db, message, channel)
+            calendar.delete_message(client, db, message, message.channel)
 
 
 async def start_server():
