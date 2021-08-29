@@ -1,8 +1,8 @@
 import datetime as dt
 import pytest
 
-from src.discord_bot.calendar import analyze_message_content, ROTATING_MATCH_PREFIX, REC_DATETIME, RE_TIME, RE_GROUPS_YEAR
-import src.discord_bot.calendar as cal
+from src.discord_bot.calendar_messages import analyze_message_content, cleanup_message
+import src.discord_bot.calendar_messages as cal
 
 message_datetime = dt.datetime.today()
 
@@ -16,7 +16,6 @@ def test_datetime():
     today = message_datetime.date()
     today_str = today.strftime('%d.%m.%Y')
 
-    print(cal.RE_GROUPS)
     print(cal.REC_DATETIME.pattern)
 
     cases = [
@@ -78,17 +77,20 @@ def test_group():
 
     for case in cases:
         res = analyze_message_content(make_case(case[0]), message_datetime)
-        assert(res.group == f'{ROTATING_MATCH_PREFIX}{case[1]}')
+        assert(res.group == f'{cal.ROTATING_MATCH_PREFIX}{case[1]}')
 
 
 def test_content():
     cases = [
         [
-            "MortiS vs AsAp | DSAWEr\nMecz rotacyjny Red <-> Black\n15.07.2021 godz. 17:10",
-            "MortiS vs AsAp | DSAWEr\nMecz rotacyjny Red <-> Black"
-        ]
+            "MortiS vs AsAp | DSAWEr\nMecz rotacyjny Red <-> Black <:ginAnt:800747442878021714>\n15.07.2021 godz. 17:10",
+            "MortiS vs AsAp | DSAWEr\nMecz rotacyjny Red <-> Black",
+        ],
+        ["some ~~crossed out~~ text ~~continued ~ here ~~ ", 'some  text'],
+        ["~~~ ~~", ""]
     ]
 
-    for case in cases:
-        res = analyze_message_content(case[0], message_datetime)
-        assert(res.content == case[1])
+    for [input, expectation] in cases:
+        res = analyze_message_content(cleanup_message(input), message_datetime)
+        assert(res.content == expectation)
+
