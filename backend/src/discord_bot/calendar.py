@@ -21,11 +21,11 @@ async def process_message(client: discord.Client, db: DbSession, message: discor
     db_msg = crud.get_message_by_original_id(db, str(message.id))
     is_content_new = not db_msg or db_msg.content != text
 
-    if not is_content_new and (db_msg and db_msg.is_parsed):
+    if not is_content_new and (db_msg and db_msg.is_parsed == 1):
         return
 
     parsed = analyze_message_content(text, message.created_at)
-    is_parsed = parsed and parsed.datetime and parsed.content
+    is_parsed = parsed is not None and parsed.datetime is not None and parsed.content is not None
 
     db_channel = crud.get_or_create_message_source(db, channel.guild.id, channel.id, channel.name)
 
@@ -35,7 +35,7 @@ async def process_message(client: discord.Client, db: DbSession, message: discor
         db.flush()
         db.refresh(db_msg)
     else:
-        db_msg = crud.update_message_content(db, db_msg.id, text)
+        db_msg = crud.update_message_content(db, db_msg.id, text, is_parsed)
 
     db_calendar = crud.get_calendar_entry_by_message_id(db, db_msg.id)
 

@@ -61,8 +61,8 @@ def get_message_by_original_id(db: DbSession, id: str) -> Message:
     return db.execute(query).scalars().one_or_none()
 
 
-def update_message_content(db: DbSession, id: int, content: str):
-    query = update(Message).where(Message.id == id).values(content=content)
+def update_message_content(db: DbSession, id: int, content: str, is_parsed: bool):
+    query = update(Message).where(Message.id == id).values(content=content, is_parsed=is_parsed)
     db.execute(query)
     db.flush()
     return db.execute(select(Message).where(Message.id == id)).scalars().one()
