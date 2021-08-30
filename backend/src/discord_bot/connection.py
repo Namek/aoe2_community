@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import cast
 
 import discord
 
@@ -37,29 +38,31 @@ async def on_ready():
                 await calendar.process_message(client, db, message, message.channel)
 
 
-def is_message_from_configured_channels(message: discord.Message) -> bool:
-    channel = message.channel
-    return channel.type == discord.ChannelType.text and\
-        channel.name in cfg.DISCORD_SERVER_CHANNEL_NAMES and\
-        message.guild.id == cfg.DISCORD_SERVER_ID
+def is_message_from_configured_channels(guild_id: int, channel_name: str):
+    return channel_name in cfg.DISCORD_SERVER_CHANNEL_NAMES and \
+        guild_id == cfg.DISCORD_SERVER_ID
+
 
 @client.event
 async def on_message(message: discord.Message):
-    if is_message_from_configured_channels(message):
+    if is_message_from_configured_channels(message.guild.id, message.channel.name):
         with get_db() as db:
             await calendar.process_message(client, db, message, message.channel)
 
 
 @client.event
-async def on_message_edit(before, after):
-    if is_message_from_configured_channels(after):
-        with get_db() as db:
-            await calendar.process_message(client, db, after, after.channel)
+async def on_raw_message_edit(payload: discord.RawMessageUpdateEvent):
+    channel = cast(discord.TextChannel, client.get_channel(payload.channel_id))
+    if is_message_from_configured_channels(payload.guild_id, channel.name):
+        if channel.type == discord.ChannelType.text:
+            msg = await channel.fetch_message(payload.message_id)
+            with get_db() as db:
+                await calendar.process_message(client, db, msg, msg.channel)
 
 
 @client.event
 async def on_message_delete(message):
-    if is_message_from_configured_channels(message):
+    if is_message_from_configured_channels(message.guild.id, message.channel.name):
         with get_db() as db:
             calendar.delete_message(client, db, message, message.channel)
 

@@ -10,6 +10,8 @@ from .calendar_messages import analyze_message_content, cleanup_message
 async def process_message(client: discord.Client, db: DbSession, message: discord.Message, channel: discord.TextChannel):
     text = cleanup_message(cast(str, message.clean_content))
 
+    print('Processing message: ' + text)
+
     if message.author == client.user:
         print('ignoring message by bot')
         return
