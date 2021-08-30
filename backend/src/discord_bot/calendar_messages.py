@@ -80,7 +80,7 @@ def cleanup_message(text: str) -> str:
     # remove stuff like <:ginAnt:800747442878021714>
     text = RE_CUSTOM_EMOJI.sub("", text)
 
-    match = re.findall(r"(?<![.+?])(~{2})(?!~~)(.+?)(?<!~~)\1(?![.+?])", text)
+    match = re.findall(r"(?<![.+?])(~{2})(?!~~)(.+?)(?<!~~)\1(?![.+?])", text, flags=re.DOTALL)
     if match:
         for _, m in match:
             text = re.sub(f"~~{re.escape(m)}~~", '', text)

@@ -87,7 +87,8 @@ def test_content():
             "MortiS vs AsAp | DSAWEr\nMecz rotacyjny Red <-> Black",
         ],
         ["some ~~crossed out~~ text ~~continued ~ here ~~ ", 'some  text'],
-        ["~~~ ~~", ""]
+        ["~~~ ~~", ""],
+        ["~~some\nmultiline\nannouncement~~", ""],
     ]
 
     for [input, expectation] in cases:
