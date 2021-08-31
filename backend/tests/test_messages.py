@@ -72,12 +72,15 @@ def test_group():
         ["Red <-> Black", "Red <-> Black"],
         ["Red<->Black", "Red <-> Black"],
         ["Red - Black", "Red <-> Black"],
-        ["Mecz rotacyjny Blue <-> Green", "Blue <-> Green"]
+        ["Mecz rotacyjny Blue <-> Green", "Blue <-> Green"],
+        ["Gold Ants @Redi vs Greenie", "Gold"],
+        ["Gold: @Redi vs Greenie", "Gold"],
+        ["Gold Redi vs Greenie", "Gold"],
     ]
 
-    for case in cases:
-        res = analyze_message_content(make_case(case[0]), message_datetime)
-        assert(res.group == f'{cal.ROTATING_MATCH_PREFIX}{case[1]}')
+    for [input, expectation] in cases:
+        res = analyze_message_content(make_case(input), message_datetime)
+        assert(res.group == expectation)
 
 
 def test_content():

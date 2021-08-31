@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 ANT_GROUP_NAMES = ['Gold', 'Red', 'Black', 'Blue', 'Green']
 ANT_GROUP_NAMES_SMALL = [name.lower() for name in ANT_GROUP_NAMES]
+REC_ANT_GROUP_NAME = re.compile(r'\b(' + '|'.join(ANT_GROUP_NAMES) + r')\b', re.IGNORECASE)
 REC_VS = re.compile(r'([^\n]+) +vs +([^\n]+)')
 REC_YEAR = re.compile(r'\d\d\d\d')
 RE_DATE_NUMBERED = lambda i: r'(' +\
@@ -64,7 +65,6 @@ RE_GROUPS_MINS = [x for x in RE_GROUPS if x.startswith('minutes')]
 RE_GROUPS_MONTH_NAMES = [x for x in RE_GROUPS if x.startswith('_month_name')]
 RE_GROUPS_DAY_OR_MONTH = [x for x in RE_GROUPS if x.startswith('_day_or_month')]
 
-ROTATING_MATCH_PREFIX = "Rotacyjny: "
 RE_CUSTOM_EMOJI = re.compile(r'<:[a-zA-Z]+:[0-9]+>')
 
 
@@ -96,7 +96,6 @@ def analyze_message_content(text: str, message_datetime: datetime) -> Optional[P
 
 
 def _analyze_message_content(text: str, message_datetime: datetime) -> ParsedMessage:
-    text_small = text.lower()
     message_date = message_datetime.date()
 
     (group, date, time, content) = (None, None, None, text)
@@ -104,15 +103,15 @@ def _analyze_message_content(text: str, message_datetime: datetime) -> ParsedMes
     vs = [vs.group(1), vs.group(2)] if vs else None
 
     found_groups = []
-    for gi in range(0, len(ANT_GROUP_NAMES)):
-        if ANT_GROUP_NAMES_SMALL[gi] in text_small:
-            found_groups.append(ANT_GROUP_NAMES[gi])
+    print(REC_ANT_GROUP_NAME.findall(text))
+    for name in REC_ANT_GROUP_NAME.findall(text):
+        found_groups.append(name)
 
     if len(found_groups) == 1:
         group = found_groups[0]
 
     if len(found_groups) == 2:
-        group = f"{ROTATING_MATCH_PREFIX}{found_groups[0]} <-> {found_groups[1]}"
+        group = f"{found_groups[0]} <-> {found_groups[1]}"
 
     dt = REC_DATETIME.search(text)
 
