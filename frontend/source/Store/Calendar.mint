@@ -14,6 +14,7 @@ record Event {
 store Calendar {
   state currentMonth = 0
   state currentYear = 0
+  state currentDay = 0
   state today = Time.today()
 
   state daysData : Map(String, Array(Event)) = Map.empty()
@@ -27,6 +28,7 @@ store Calendar {
         {
           currentMonth = Debug.log(Time.monthNum(today)),
           currentYear = Time.year(today),
+          currentDay = Time.dayNum(today),
           today = today
         }
 

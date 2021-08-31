@@ -2,7 +2,7 @@ component Page.Calendar {
   const MONTH_NAMES = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"]
   const DAY_NAMES = ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"]
 
-  connect Calendar exposing { today, currentMonth, currentYear }
+  connect Calendar exposing { today, currentMonth, currentYear, currentDay }
 
   style app {
     justify-content: center;
@@ -33,7 +33,7 @@ component Page.Calendar {
     }
   }
 
-  style day {
+  style day (isToday : Bool) {
     display: flex;
     flex-direction: column;
     min-height: 100px;
@@ -43,6 +43,11 @@ component Page.Calendar {
     border-bottom: 1px solid black;
     border-right: 1px solid black;
     overflow: hidden;
+
+    if (isToday) {
+      background-color: #6083AE;
+      color: black;
+    }
 
     &:nth-child(7n + 1) {
       border-left: 1px solid black;
@@ -80,7 +85,7 @@ component Page.Calendar {
     font-weight: bold;
   }
 
-  style event (colorId : number) {
+  style event (colorId : Number) {
     font-size: 0.8em;
 
     if (colorId == 1) {
@@ -138,7 +143,7 @@ component Page.Calendar {
           }
 
           for (day of Calendar.lastDaysFromPreviousMonth(currentMonth, currentYear)) {
-            <div::day::prev>
+            <div::day(false)::prev>
               <{ "#{day}" }>
 
               <{ renderEvents(day, currentMonth - 1, currentYear) }>
@@ -146,7 +151,7 @@ component Page.Calendar {
           }
 
           for (day of Time.range(firstMonthDay, Time.endOf("month", firstMonthDay))) {
-            <div::day>
+            <div::day(Time.dayNum(day) == currentDay)>
               <{ Time.format("d", day) }>
 
               <{ renderEvents(Time.dayNum(day), currentMonth, currentYear) }>
