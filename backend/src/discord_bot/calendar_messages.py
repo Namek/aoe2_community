@@ -105,7 +105,7 @@ def _analyze_message_content(text: str, message_datetime: datetime) -> ParsedMes
     found_groups = []
     print(REC_ANT_GROUP_NAME.findall(text))
     for name in REC_ANT_GROUP_NAME.findall(text):
-        found_groups.append(name)
+        found_groups.append(name.capitalize())
 
     if len(found_groups) == 1:
         group = found_groups[0]
