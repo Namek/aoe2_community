@@ -3,6 +3,7 @@ component Page.Matches {
   connect Matches exposing { matches }
 
   state sortingMode = SortingMode::DateDesc
+  state watchStatusFilter : Maybe(Number) = Maybe::Nothing
 
   fun componentDidMount {
     Matches.refreshList()
@@ -75,95 +76,147 @@ component Page.Matches {
           <th>"Draft"</th>
           <th>"Nagrania"</th>
 
-          <th>"Status"</th>
+          <th>
+            "Status "
+
+            if (App.hasAdminRole) {
+              <div class="select is-small">
+                <select
+                  value={
+                    (watchStatusFilter
+                    |> Maybe.map(Number.toString)) or ""
+                  }
+                  onChange={
+                    (evt : Html.Event) {
+                      try {
+                        value =
+                          Number.fromString(`#{evt.target}.value`)
+
+                        next { watchStatusFilter = value }
+                      }
+                    }
+                  }>
+
+                  <option value="">
+                    "wszystkie"
+                  </option>
+
+                  <option value={Number.toString(Matches:WATCH_STATUS_UNTOUCHED)}>
+                    "❌ Nietknięty"
+                  </option>
+
+                  <option value={Number.toString(Matches:WATCH_STATUS_WATCHED)}>
+                    "👀 Obejrzany"
+                  </option>
+
+                  <option value={Number.toString(Matches:WATCH_STATUS_WATCHED_AND_NOTED)}>
+                    "📝 Wpisany"
+                  </option>
+
+                  <option value={Number.toString(Matches:WATCH_STATUS_COMMENTED)}>
+                    "📺 Skomentowany"
+                  </option>
+
+                </select>
+              </div>
+            }
+          </th>
         </tr>
       </thead>
 
       <tbody>
         for (match of Array.sort(matchSortFn, matches)) {
-          <tr>
-            <td>"#{Utils.epochToDateString(match.date)}"</td>
-            <td>"#{match.group} (BO#{match.bestOf})"</td>
-
-            <td>
-              <{ renderDraft(match) }>
-            </td>
-
-            <td>
-              for (rec of match.recordings
-              |> Array.mapWithIndex((rec : Recording, i : Number) { {rec, i} })) {
-                <>
-                  <a
-                    href="#{@ENDPOINT}/api/match/#{match.id}/recording/#{rec[0].id}"
-                    target="_blank"
-                    rel="noopener noreferrer">
-
-                    "##{rec[1] + 1}"
-
-                  </a>
-
-                  " "
-                </>
-              }
-            </td>
-
-            <td>
-              if (App.hasAdminRole) {
-                <>
-                  <div class="select">
-                    <select
-                      value={Number.toString(match.watchStatus)}
-                      onChange={
-                        (evt : Html.Event) {
-                          Matches.setWatchStatus(match, `+#{evt.target}.value`)
-                        }
-                      }>
-
-                      <option value={Number.toString(Matches:WATCH_STATUS_UNTOUCHED)}>
-                        "❌ Nietknięty"
-                      </option>
-
-                      <option value={Number.toString(Matches:WATCH_STATUS_WATCHED)}>
-                        "👀 Obejrzany"
-                      </option>
-
-                      <option value={Number.toString(Matches:WATCH_STATUS_WATCHED_AND_NOTED)}>
-                        "📝 Wpisany"
-                      </option>
-
-                      <option value={Number.toString(Matches:WATCH_STATUS_COMMENTED)}>
-                        "📺 Skomentowany"
-                      </option>
-
-                    </select>
-                  </div>
-
-                  <br/>
-                  <br/>
-
-                  <button
-                    class="button is-danger is-small"
-                    onClick={() { Matches.deleteMatch(match) }}>
-
-                    <span>"Usuń mecz"</span>
-
-                  </button>
-                </>
-              } else {
-                <span>
-                  case (match.watchStatus) {
-                    Matches:WATCH_STATUS_WATCHED => "👀 Obejrzany"
-                    Matches:WATCH_STATUS_WATCHED_AND_NOTED => "📝 Wpisany"
-                    Matches:WATCH_STATUS_COMMENTED => "📺 Skomentowany"
-                    => ""
-                  }
-                </span>
-              }
-            </td>
-          </tr>
+          if (Maybe.isNothing(watchStatusFilter) || watchStatusFilter == Maybe::Just(match.watchStatus)) {
+            renderMatch(match)
+          } else {
+            <>""</>
+          }
         }
       </tbody>
     </table>
+  }
+
+  fun renderMatch (match : Match) : Html {
+    <tr>
+      <td>"#{Utils.epochToDateString(match.date)}"</td>
+      <td>"#{match.group} (BO#{match.bestOf})"</td>
+
+      <td>
+        <{ renderDraft(match) }>
+      </td>
+
+      <td>
+        for (rec of match.recordings
+        |> Array.mapWithIndex((rec : Recording, i : Number) { {rec, i} })) {
+          <>
+            <a
+              href="#{@ENDPOINT}/api/match/#{match.id}/recording/#{rec[0].id}"
+              target="_blank"
+              rel="noopener noreferrer">
+
+              "##{rec[1] + 1}"
+
+            </a>
+
+            " "
+          </>
+        }
+      </td>
+
+      <td>
+        if (App.hasAdminRole) {
+          <>
+            <div class="select">
+              <select
+                value={Number.toString(match.watchStatus)}
+                onChange={
+                  (evt : Html.Event) {
+                    Matches.setWatchStatus(match, `+#{evt.target}.value`)
+                  }
+                }>
+
+                <option value={Number.toString(Matches:WATCH_STATUS_UNTOUCHED)}>
+                  "❌ Nietknięty"
+                </option>
+
+                <option value={Number.toString(Matches:WATCH_STATUS_WATCHED)}>
+                  "👀 Obejrzany"
+                </option>
+
+                <option value={Number.toString(Matches:WATCH_STATUS_WATCHED_AND_NOTED)}>
+                  "📝 Wpisany"
+                </option>
+
+                <option value={Number.toString(Matches:WATCH_STATUS_COMMENTED)}>
+                  "📺 Skomentowany"
+                </option>
+
+              </select>
+            </div>
+
+            <br/>
+            <br/>
+
+            <button
+              class="button is-danger is-small"
+              onClick={() { Matches.deleteMatch(match) }}>
+
+              <span>"Usuń mecz"</span>
+
+            </button>
+          </>
+        } else {
+          <span>
+            case (match.watchStatus) {
+              Matches:WATCH_STATUS_WATCHED => "👀 Obejrzany"
+              Matches:WATCH_STATUS_WATCHED_AND_NOTED => "📝 Wpisany"
+              Matches:WATCH_STATUS_COMMENTED => "📺 Skomentowany"
+              => ""
+            }
+          </span>
+        }
+      </td>
+    </tr>
   }
 
   fun renderDraft (match : Match) : Html {
