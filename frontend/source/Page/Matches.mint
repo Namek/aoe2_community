@@ -41,114 +41,7 @@ component Page.Matches {
               if (Array.size(ms) == 0) {
                 <p>"Brak meczy."</p>
               } else {
-                <table class="table is-hoverable is-narrow">
-                  <thead>
-                    <tr>
-                      <th onClick={toggleSortMode}>
-                        "Data "
-
-                        if (sortingMode == SortingMode::DateAsc) {
-                          "↓"
-                        }
-
-                        if (sortingMode == SortingMode::DateDesc) {
-                          "↑"
-                        }
-                      </th>
-
-                      <th>"Grupa"</th>
-                      <th>"Draft"</th>
-                      <th>"Nagrania"</th>
-
-                      <th>"Status"</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    for (match of Array.sort(matchSortFn, ms)) {
-                      <tr>
-                        <td>"#{Utils.epochToDateString(match.date)}"</td>
-                        <td>"#{match.group} (BO#{match.bestOf})"</td>
-
-                        <td>
-                          <{ renderDraft(match) }>
-                        </td>
-
-                        <td>
-                          for (rec of match.recordings
-                          |> Array.mapWithIndex((rec : Recording, i : Number) { {rec, i} })) {
-                            <>
-                              <a
-                                href="#{@ENDPOINT}/api/match/#{match.id}/recording/#{rec[0].id}"
-                                target="_blank"
-                                rel="noopener noreferrer">
-
-                                "##{rec[1] + 1}"
-
-                              </a>
-
-                              " "
-                            </>
-                          }
-                        </td>
-
-                        <td>
-                          if (App.hasAdminRole) {
-                            <>
-                              <div class="select">
-                                <select
-                                  value={Number.toString(match.watchStatus)}
-                                  onChange={
-                                    (evt : Html.Event) {
-                                      Matches.setWatchStatus(match, `+#{evt.target}.value`)
-                                    }
-                                  }>
-
-                                  <option value={Number.toString(Matches:WATCH_STATUS_UNTOUCHED)}>
-                                    "❌ Nietknięty"
-                                  </option>
-
-                                  <option value={Number.toString(Matches:WATCH_STATUS_WATCHED)}>
-                                    "👀 Obejrzany"
-                                  </option>
-
-                                  <option value={Number.toString(Matches:WATCH_STATUS_WATCHED_AND_NOTED)}>
-                                    "📝 Wpisany"
-                                  </option>
-
-                                  <option value={Number.toString(Matches:WATCH_STATUS_COMMENTED)}>
-                                    "📺 Skomentowany"
-                                  </option>
-
-                                </select>
-                              </div>
-
-                              <br/>
-                              <br/>
-
-                              <button
-                                class="button is-danger is-small"
-                                onClick={() { Matches.deleteMatch(match) }}>
-
-                                <span>"Usuń mecz"</span>
-
-                              </button>
-                            </>
-                          } else {
-                            <span>
-                              case (match.watchStatus) {
-                                Matches:WATCH_STATUS_WATCHED => "👀 Obejrzany"
-                                Matches:WATCH_STATUS_WATCHED_AND_NOTED => "📝 Wpisany"
-                                Matches:WATCH_STATUS_COMMENTED => "📺 Skomentowany"
-                                => ""
-                              }
-                            </span>
-                          }
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
+                renderMatchesTable(ms)
               }
 
             Result::Err(err) =>
@@ -160,6 +53,117 @@ component Page.Matches {
         Maybe::Nothing => <p>"Ładowanie..."</p>
       }
     </div>
+  }
+
+  fun renderMatchesTable (matches : Array(Match)) : Html {
+    <table class="table is-hoverable is-narrow">
+      <thead>
+        <tr>
+          <th onClick={toggleSortMode}>
+            "Data "
+
+            if (sortingMode == SortingMode::DateAsc) {
+              "↓"
+            }
+
+            if (sortingMode == SortingMode::DateDesc) {
+              "↑"
+            }
+          </th>
+
+          <th>"Grupa"</th>
+          <th>"Draft"</th>
+          <th>"Nagrania"</th>
+
+          <th>"Status"</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        for (match of Array.sort(matchSortFn, matches)) {
+          <tr>
+            <td>"#{Utils.epochToDateString(match.date)}"</td>
+            <td>"#{match.group} (BO#{match.bestOf})"</td>
+
+            <td>
+              <{ renderDraft(match) }>
+            </td>
+
+            <td>
+              for (rec of match.recordings
+              |> Array.mapWithIndex((rec : Recording, i : Number) { {rec, i} })) {
+                <>
+                  <a
+                    href="#{@ENDPOINT}/api/match/#{match.id}/recording/#{rec[0].id}"
+                    target="_blank"
+                    rel="noopener noreferrer">
+
+                    "##{rec[1] + 1}"
+
+                  </a>
+
+                  " "
+                </>
+              }
+            </td>
+
+            <td>
+              if (App.hasAdminRole) {
+                <>
+                  <div class="select">
+                    <select
+                      value={Number.toString(match.watchStatus)}
+                      onChange={
+                        (evt : Html.Event) {
+                          Matches.setWatchStatus(match, `+#{evt.target}.value`)
+                        }
+                      }>
+
+                      <option value={Number.toString(Matches:WATCH_STATUS_UNTOUCHED)}>
+                        "❌ Nietknięty"
+                      </option>
+
+                      <option value={Number.toString(Matches:WATCH_STATUS_WATCHED)}>
+                        "👀 Obejrzany"
+                      </option>
+
+                      <option value={Number.toString(Matches:WATCH_STATUS_WATCHED_AND_NOTED)}>
+                        "📝 Wpisany"
+                      </option>
+
+                      <option value={Number.toString(Matches:WATCH_STATUS_COMMENTED)}>
+                        "📺 Skomentowany"
+                      </option>
+
+                    </select>
+                  </div>
+
+                  <br/>
+                  <br/>
+
+                  <button
+                    class="button is-danger is-small"
+                    onClick={() { Matches.deleteMatch(match) }}>
+
+                    <span>"Usuń mecz"</span>
+
+                  </button>
+                </>
+              } else {
+                <span>
+                  case (match.watchStatus) {
+                    Matches:WATCH_STATUS_WATCHED => "👀 Obejrzany"
+                    Matches:WATCH_STATUS_WATCHED_AND_NOTED => "📝 Wpisany"
+                    Matches:WATCH_STATUS_COMMENTED => "📺 Skomentowany"
+                    => ""
+                  }
+                </span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
   }
 
   fun renderDraft (match : Match) : Html {
