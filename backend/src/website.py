@@ -139,7 +139,7 @@ def post_match(
     if not is_admin:
         expected_maps = ['Arabia', 'AnT - Arabia'] + all_maps
         for (_, match_info, _) in recordings:
-            map_name = match_info['map_name']
+            map_name = match_info['map_name'].replace('Pog Islands', 'Bog Islands')
 
             ok = False
             for expected_name in expected_maps:
