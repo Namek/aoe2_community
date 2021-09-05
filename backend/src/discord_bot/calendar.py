@@ -8,9 +8,9 @@ from .calendar_messages import analyze_message_content, cleanup_message
 
 
 async def process_message(client: discord.Client, db: DbSession, message: discord.Message, channel: discord.TextChannel):
-    text = cleanup_message(cast(str, message.clean_content))
-
-    print('Processing message: ' + text)
+    original_text = cast(str, message.clean_content)
+    print('Processing message: ' + original_text)
+    text = cleanup_message(original_text)
 
     if message.author == client.user:
         print('ignoring message by bot')
@@ -53,9 +53,13 @@ async def process_message(client: discord.Client, db: DbSession, message: discor
             db.add(db_calendar)
         else:
             crud.update_calendar_entry(db, db_calendar.id, parsed.datetime, calendar_entry_text)
+
+        db.commit()
     else:
         if db_calendar:
             db.delete(db_calendar)
+
+        db.commit()
 
         author_name = message.author.display_name
         print(f'I cannot parse this one by {author_name}:\n{text}\n')
@@ -76,14 +80,14 @@ async def process_message(client: discord.Client, db: DbSession, message: discor
 
         await message.remove_reaction('📅', client.user)
 
-    db.commit()
 
-
-def delete_message(client: discord.Client, db: DbSession, message: discord.Message, channel: discord.TextChannel):
-    print(f'deleting a message: {message.clean_content}')
-
-    db_msg = crud.get_message_by_original_id(db, message.id)
+def delete_message(client: discord.Client, db: DbSession, message_id: int, channel: discord.TextChannel):
+    db_msg = crud.get_message_by_original_id(db, message_id)
 
     if db_msg:
         crud.delete_message_with_calendar_entries(db, db_msg.id)
         db.commit()
+
+def delete_old_events(db: DbSession):
+    crud.delete_calendar_events_with_no_source_messages(db)
+    db.commit()

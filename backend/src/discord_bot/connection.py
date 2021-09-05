@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import cast
+from typing import cast, Optional
 
 import discord
 
@@ -33,19 +33,23 @@ async def on_ready():
     print(f'Channels:\n{channels_str}\n')
 
     for channel in channels:
-        async for message in channel.history(limit=200):
+        async for message in channel.history(limit=300):
             with get_db() as db:
                 await calendar.process_message(client, db, message, message.channel)
 
+    with get_db() as db:
+        calendar.delete_old_events(db)
+        db.commit()
 
-def is_message_from_configured_channels(guild_id: int, channel_name: str):
+
+def is_message_from_configured_channels(guild_id: Optional[int], channel_name: Optional[str]):
     return channel_name in cfg.DISCORD_SERVER_CHANNEL_NAMES and \
-        guild_id == cfg.DISCORD_SERVER_ID
+        (guild_id == cfg.DISCORD_SERVER_ID if guild_id is not None else True)
 
 
 @client.event
 async def on_message(message: discord.Message):
-    if is_message_from_configured_channels(message.guild.id, message.channel.name):
+    if message.guild and message.channel and is_message_from_configured_channels(message.guild.id, message.channel.name if message.channel else None):
         with get_db() as db:
             await calendar.process_message(client, db, message, message.channel)
 
@@ -53,18 +57,26 @@ async def on_message(message: discord.Message):
 @client.event
 async def on_raw_message_edit(payload: discord.RawMessageUpdateEvent):
     channel = cast(discord.TextChannel, client.get_channel(payload.channel_id))
-    if is_message_from_configured_channels(payload.guild_id, channel.name):
-        if channel.type == discord.ChannelType.text:
+    if channel.type == discord.ChannelType.text:
+        if is_message_from_configured_channels(payload.guild_id, channel.name):
             msg = await channel.fetch_message(payload.message_id)
             with get_db() as db:
                 await calendar.process_message(client, db, msg, msg.channel)
 
 
 @client.event
-async def on_message_delete(message):
-    if is_message_from_configured_channels(message.guild.id, message.channel.name):
+async def on_raw_message_delete(payload: discord.RawMessageDeleteEvent):
+    channel = cast(discord.TextChannel, client.get_channel(payload.channel_id))
+    if is_message_from_configured_channels(payload.guild_id, channel.name):
         with get_db() as db:
-            calendar.delete_message(client, db, message, message.channel)
+            calendar.delete_message(client, db, payload.message_id, channel)
+
+
+@client.event
+async def on_message_delete(message):
+    if message.guild and message.channel and is_message_from_configured_channels(message.guild.id, message.channel.name):
+        with get_db() as db:
+            calendar.delete_message(client, db, message.id, message.channel)
 
 
 async def start_server():

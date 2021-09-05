@@ -34,7 +34,7 @@ REC_MONTH_NAMES = [re.compile(r, flags=re.IGNORECASE) for r in RE_MONTH_NAMES]
 RE_DATE_VERBAL = lambda i:\
     rf'(?P<day{i}>\d\d?).*?(?P<_month_name{i}>' + '|'.join(RE_MONTH_NAMES) + rf')([^0-9]*(?P<year{i}>\d\d\d\d))?'
 RE_TIME = lambda i: rf'((?P<hour{i}1>\d\d?)[:.](?P<minutes{i}>\d\d)|(?P<hour{i}2>\d\d))'
-RE_RELATIVE_EXPR = [r'dzisiaj|today', r'jutro|tomorrow', r'pojutrze|after tomorrow']
+RE_RELATIVE_EXPR = [r'dzisiaj|dziś|today', r'jutro|tomorrow', r'pojutrze|after tomorrow']
 REC_RELATIVE_EXPR = [re.compile(r, flags=re.IGNORECASE) for r in RE_RELATIVE_EXPR]
 REC_DATETIME = re.compile(
     r'(' +

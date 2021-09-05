@@ -1,5 +1,4 @@
-from sqlalchemy import delete, select, update
-from sqlalchemy.orm import aliased
+from sqlalchemy import delete, join, select, update
 from typing import (List, Optional)
 
 from . import schemas
@@ -105,3 +104,10 @@ def update_calendar_entry(db: DbSession, id: int, datetime, description: str):
 def delete_message_with_calendar_entries(db: DbSession, msg_id: int):
     db.execute(delete(CalendarEntry).where(CalendarEntry.message_id == msg_id))
     db.execute(delete(Message).where(Message.id == msg_id))
+
+
+def delete_calendar_events_with_no_source_messages(db: DbSession):
+    query = delete(CalendarEntry).where(CalendarEntry.id.notin_(
+        select([CalendarEntry.id]).select_from(join(CalendarEntry, Message, CalendarEntry.message_id == Message.id))
+    ))
+    db.execute(query, execution_options=dict({"synchronize_session": 'fetch'}))
