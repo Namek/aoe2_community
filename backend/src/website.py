@@ -15,6 +15,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from . import cfg, crud, models, schemas, utils
 from .database import web_db as get_db
+from .validation import validate_maps
 
 ROLE_ADMIN = 1
 
@@ -129,7 +130,7 @@ def post_match(
             raise HTTPException(500, detail=f"Uszkodzony plik nagrania: {file.filename}")
     recordings.sort(key=lambda r: r[0].filename)
 
-    # check duplicates by map names
+    # check duplicates by map names (but ignore restored matches)
     map_names = [r[1]['map_name']
                  for r in recordings if r[1]['start_time_seconds'] <= 5]
     if len(set(map_names)) > len(recordings):
@@ -137,23 +138,10 @@ def post_match(
 
     # verify whether all the given recordings match the maps
     if not is_admin:
-        expected_maps = ['Arabia', 'AnT - Arabia'] + all_maps
-        for (_, match_info, _) in recordings:
-            map_name = match_info['map_name'].replace('Pog Islands', 'Bog Islands')
-
-            ok = False
-            for expected_name in expected_maps:
-                # e.g. "Gold Rush" in "HC4 - Gold Rush" or "AnT - Arabia" as "Arabia"
-                if map_name in expected_name or map_name in ("AnT - " + expected_name):
-                    ok = True
-
-                # replace prefix like "RBW4 - " or "HC3 - " to "AnT - " and check again
-                elif map_name in re.sub(r'[a-zA-Z0-9]{,4} - ', 'AnT - ', expected_name):
-                    ok = True
-
-            if not ok:
-                raise HTTPException(
-                    500, detail=f"Mapa {map_name} jest spoza podanej puli: {', '.join(expected_maps)}.")
+        recordings_maps = [match_info['map_name'] for (_, match_info, _) in recordings]
+        result = validate_maps(all_maps, recordings_maps)
+        if type(result) == str:
+            raise HTTPException(500, detail=str)
 
     def update_dict(original_dict, **kwargs):
         return {**original_dict, **kwargs}
