@@ -28,7 +28,7 @@ record Recording {
 enum SortingMode {
   DateDesc
   DateAsc
-  Id
+  IdDesc
 }
 
 store Matches {

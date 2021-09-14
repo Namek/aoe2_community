@@ -15,15 +15,15 @@ component Page.Matches {
         sortingMode =
           case (sortingMode) {
             SortingMode::DateDesc => SortingMode::DateAsc
-            SortingMode::DateAsc => SortingMode::Id
-            SortingMode::Id => SortingMode::DateDesc
+            SortingMode::DateAsc => SortingMode::IdDesc
+            SortingMode::IdDesc => SortingMode::DateDesc
           }
       }
   }
 
   fun matchSortFn (m1 : Match, m2 : Match) {
     case (sortingMode) {
-      SortingMode::Id => 0
+      SortingMode::IdDesc => m2.id - m1.id
 
       SortingMode::DateAsc =>
         m1.date - m2.date
