@@ -1,8 +1,6 @@
-import asyncio
 from pathlib import Path
 import os
 import sys
-import time
 import threading
 
 import uvicorn
@@ -52,21 +50,9 @@ def run_website():
     return thread
 
 
-def run_discord_bot():
-    async def launch():
-        if cfg.ENABLE_DISCORD_BOT:
-            from .discord_bot.connection import start_server
-            await start_server()
-
-    thread = threading.Thread(target=asyncio.run, args=(launch(),), daemon=True)
-    thread.start()
-    return thread
-
-
 def run():
     threads = [
         run_website(),
-        run_discord_bot()
     ]
 
     try:

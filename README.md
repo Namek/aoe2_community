@@ -1,4 +1,9 @@
-Website for sharing AoE2 DE recordings of matches. Currently adjusted for the [AoEII ANThology: Ant League 2022 Spring Edition](https://play.toornament.com/pl/tournaments/5304504147050160128/).
+## What?
+
+1. Website for sharing AoE2 DE recordings of matches.
+2. Discord Bot gathering events from chat and putting those on the website.
+
+Both currently adjusted for the [AoEII ANThology: Ant League 2022 Spring Edition](https://play.toornament.com/pl/tournaments/5304504147050160128/).
 
 ## Development
 
@@ -48,10 +53,22 @@ Tech stack:
 1. `mint start --auto-format --env .env`
 
 
+### Discord Bot
+
+#### Setup
+
+TODO
+
+#### Develop
+
+TODO
+
+
 ## Deploy
 
 1. `git submodule update --init`
 2. `cp ./frontend/.env.production.template ./frontend/.env` and adjust
 3. `cp ./backend/.env.template ./backend/.env` and adjust
-4. `docker-compose up --build -d`
+4. `cp ./bot/Bot/.env.template ./bot/Bot/.env` and adjust
+5. `docker-compose up --build -d`
 

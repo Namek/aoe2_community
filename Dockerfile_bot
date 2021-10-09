@@ -1,0 +1,7 @@
+FROM mcr.microsoft.com/dotnet/sdk:5.0
+WORKDIR /app/bot/Bot
+COPY bot/Bot/.env ./.env
+COPY bot/Bot/ ./
+RUN dotnet restore
+
+ENTRYPOINT ["dotnet", "run"]
