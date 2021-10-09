@@ -2,14 +2,26 @@ version: '3.2'
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile_website
     ports:
       - "0.0.0.0:8081:8080"
     restart: always
     volumes:
-      - appdb:/app/backend/database
+      - appdb:/app/database
     environment:
       - PYTHONUNBUFFERED=1
+
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile_bot
+    restart: always
+    volumes:
+      - appdb:/app/database
+    depends_on:
+      - "app"
 
 volumes:
   appdb:

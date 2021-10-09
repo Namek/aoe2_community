@@ -1,10 +1,12 @@
+# IDEs
 .idea/
+.vs/
 .vscode/
 
-/backend/database/*.db
-!/backend/database/app.template.db
-/backend/database/files/
-/backend/database/sessions/
+/database/*.db
+!/database/app.template.db
+/database/files/
+/database/sessions/
 /frontend/dist/
 
 discord.log
@@ -22,3 +24,11 @@ Scripts/
 __pycache__/
 pyvenv.cfg
 .venv
+.fake
+.ionide
+
+# dotnet
+obj/
+.fake
+.ionide
+*.csproj.user
