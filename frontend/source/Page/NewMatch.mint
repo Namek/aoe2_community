@@ -3,57 +3,59 @@ component Page.NewMatch {
 
   const MAPS_GOLD =
     [
+      "Acclivity",
+      "Enclosed",
+      "Frigid Lake",
       "Land Madness",
-      "Bog Islands",
-      "TidePool",
-      "HC4 - Bypass",
-      "RBW3 - Rockslide",
-      "RBW4 - Acclivity",
-      "RBW4 - Meadow"
+      "Meadow",
+      "Wade",
+      "Bypass",
+      "Rockslide"
     ]
 
   const MAPS_RED =
     [
+      "Acclivity",
+      "Enclosed",
+      "Frigid Lake",
       "Land Madness",
-      "Bog Islands",
-      "TidePool",
-      "HC4 - Bypass",
-      "HC4 - Mudflow",
-      "RBW4 - Acclivity",
-      "RBW4 - Meadow"
+      "Meadow",
+      "Wade",
+      "Bypass"
     ]
 
   const MAPS_BLACK =
     [
+      "Enclosed",
+      "Frigid Lake",
       "Land Madness",
-      "Bog Islands",
-      "TidePool",
-      "HC4 - Bypass",
-      "RBW4 - Meadow"
+      "Meadow",
+      "Wade",
+      "Bypass"
     ]
 
   const MAPS_BLUE =
     [
       "Land Madness",
       "Golden Pit",
-      "HC4 - Bypass",
-      "RBW3 - Cattails",
-      "RBW4 - Meadow"
+      "Bypass",
+      "Cattails",
+      "Meadow"
     ]
 
   const MAPS_GREEN =
     [
       "Acropolis",
       "Atacama",
-      "HC4 - Bypass",
-      "HC4 - Gold Rush",
-      "RBW3 - Cattails"
+      "Bypass",
+      "Gold Rush",
+      "Cattails"
     ]
 
   const MAPS_ROTATION =
     [
-      "RBW3 - Haboob",
-      "HC4 - Gold Rush"
+      "Gold Rush",
+      "Acropolis"
     ]
 
   const ALL_CIVS =
