@@ -150,7 +150,7 @@ component Page.NewMatch {
 
   get civBansCount {
     case (selectedGroup) {
-      "Mecze Rotacyjne" => 2
+      "Mecze Rotacyjne" => 0
       => 0
     }
   }
