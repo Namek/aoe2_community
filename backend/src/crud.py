@@ -83,7 +83,10 @@ def get_or_create_message_source(db: DbSession, guild_id: int, channel_id: int, 
 
 
 def get_calendar_entries(db: DbSession) -> List[schemas.CalendarEntry]:
-    query = select(CalendarEntry, Message.source_id).join(Message, CalendarEntry.message_id == Message.id)
+    query = select(CalendarEntry, Message.source_id).\
+        where(Message.is_manually_ignored == 0).\
+        join(Message, CalendarEntry.message_id == Message.id)
+
     result = [
         schemas.CalendarEntry(id=entry.id, datetime=entry.datetime, description=entry.description, source_id=source_id)
         for [entry, source_id] in db.execute(query).all()]

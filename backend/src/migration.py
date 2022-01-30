@@ -39,6 +39,7 @@ def migrate(db_path):
         block(ctx, ver7)
         block(ctx, ver8)
         block(ctx, ver9)
+        block(ctx, ver10)
 
 
 def block(ctx, fn):
@@ -184,3 +185,7 @@ def ver9(c):
             PRIMARY KEY("id" AUTOINCREMENT)
         );
     ''')
+
+
+def ver10(c):
+    c.execute('ALTER TABLE messages ADD "is_manually_ignored" INTEGER NOT NULL DEFAULT 0;')

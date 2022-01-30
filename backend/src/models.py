@@ -110,6 +110,7 @@ class Message(Base):
     source_id = Column(ForeignKey('message_sources.id'), nullable=False)
     content = Column(String, nullable=False)
     is_parsed = Column(Integer, nullable=False, default=0)
+    is_manually_ignored = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime, nullable=False, default=dt.now)
     modified_at = Column(DateTime, nullable=False, default=dt.now, onupdate=dt.now)
 
