@@ -1,4 +1,4 @@
-Website for sharing AoE2 DE recordings of matches. Currently adjusted for the [AoEII ANThology: Ant League 2021 Summer Edition](https://play.toornament.com/pl/tournaments/4777579001523625984/).
+Website for sharing AoE2 DE recordings of matches. Currently adjusted for the [AoEII ANThology: Ant League 2022 Spring Edition](https://play.toornament.com/pl/tournaments/5304504147050160128/).
 
 ## Development
 
@@ -17,7 +17,13 @@ Website for sharing AoE2 DE recordings of matches. Currently adjusted for the [A
 #### Develop
 
 1. `./Scripts/activate`
-2. `uvicorn src.website:app --reload --port 8080` OR `python -m main.py`
+
+2.a) To run the website only and get the auto-restart experience when backend files are modified:
+`uvicorn src.website:app --reload --port 8080`
+
+2.b) To run database migrations (and the Discord bot):
+`python -m main.py`
+
 
 #### Tests
 
@@ -31,7 +37,7 @@ Website for sharing AoE2 DE recordings of matches. Currently adjusted for the [A
 #### Setup
 
 1. [install Mint](https://www.mint-lang.com/install)
-2. `cp ./.env.development.template ./.env` and ajdust the file
+2. `cp ./.env.development.template ./.env` and adjust the file
 
 #### Develop
 
