@@ -47,7 +47,7 @@ component Page.NewMatch {
     [
       "Acropolis",
       "Atacama",
-      "Bypass",
+      "Hideout",
       "Gold Rush",
       "Cattails"
     ]
