@@ -19,6 +19,7 @@ def validate_maps(all_maps: List[str], recordings_maps: List[str]):
                 ok = True
 
         if not ok:
-            return f"Mapa {map_name} jest spoza podanej puli: {', '.join(expected_maps)}."
+            map_names = ["\"" + name + "\"" for name in expected_maps]
+            return f"Mapa \"{map_name}\" jest spoza podanej puli: {', '.join(map_names)}."
 
     return True
