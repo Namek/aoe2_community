@@ -3,7 +3,7 @@ import re
 from typing import List
 
 def validate_maps(all_maps: List[str], recordings_maps: List[str]):
-    expected_maps = [name.casefold() for name in (['Arabia', 'ANT - Arabia'] + all_maps)]
+    expected_maps = [name.casefold() for name in (['Arabia', 'ANT - Arabia', 'KtsOTD - Arabia'] + all_maps)]
 
     for rec_map_name in recordings_maps:
         map_name = rec_map_name.replace('Pog Islands', 'Bog Islands').casefold()
