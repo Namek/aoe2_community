@@ -181,7 +181,7 @@ component Page.Calendar {
         for (evt of events) {
           <div::event(evt.sourceId)>
             <span::eventTime>
-              <{ Time.format("HH:ss", evt.datetime) }>
+              <{ Time.format("HH:mm", evt.datetime) }>
             </span>
 
             "#{evt.name}"

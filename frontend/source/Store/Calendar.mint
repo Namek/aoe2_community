@@ -48,7 +48,7 @@ store Calendar {
       entries =
         response.body
         |> Json.parse
-        |> Maybe.toResult("Bład pobierania kalendarza.")
+        |> Maybe.toResult("Błąd pobierania kalendarza.")
         |> Result.flatMap(
           (json : Object) {
             decode json as Array(Api.CalendarEntry)
