@@ -141,7 +141,7 @@ def post_match(
         recordings_maps = [match_info['map_name'] for (_, match_info, _) in recordings]
         result = validate_maps(all_maps, recordings_maps)
         if type(result) == str:
-            raise HTTPException(500, detail=str)
+            raise HTTPException(500, detail=result)
 
     def update_dict(original_dict, **kwargs):
         return {**original_dict, **kwargs}
