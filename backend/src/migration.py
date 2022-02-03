@@ -40,6 +40,7 @@ def migrate(db_path):
         block(ctx, ver8)
         block(ctx, ver9)
         block(ctx, ver10)
+        block(ctx, ver11)
 
 
 def block(ctx, fn):
@@ -47,7 +48,7 @@ def block(ctx, fn):
         print(f"Running migration {ctx['block_index'] + 1}")
         db = ctx['db']
         cursor = db.cursor()
-        cursor.execute('BEGIN')
+        cursor.execute('BEGIN TRANSACTION')
         try:
             fn(cursor)
             ctx['version'] += 1
@@ -189,3 +190,26 @@ def ver9(c):
 
 def ver10(c):
     c.execute('ALTER TABLE messages ADD "is_manually_ignored" INTEGER NOT NULL DEFAULT 0;')
+
+
+def ver11(c):
+    # make most fields nullable
+    c.execute('''
+        CREATE TABLE recordings__copy (
+            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            filename TEXT UNIQUE NOT NULL,
+            mod_time TEXT,
+            original_filename INTEGER,
+            map_name TEXT,
+            completed INTEGER,
+            game_version TEXT,
+            team_count INTEGER,
+            game_map_type TEXT,
+            "start_time_seconds" INTEGER DEFAULT 0,
+            "duration_seconds" INTEGER DEFAULT 0
+        );
+    ''')
+    c.execute('INSERT INTO recordings__copy SELECT * FROM recordings')
+    c.execute('DROP TABLE recordings')
+    c.execute('ALTER TABLE recordings__copy RENAME TO recordings')
+

@@ -22,7 +22,7 @@ record MatchPatch {
 
 record Recording {
   id : Number,
-  gameVersion : String using "game_version"
+  gameVersion : Maybe(String) using "game_version"
 }
 
 enum SortingMode {

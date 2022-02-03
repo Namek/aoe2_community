@@ -121,23 +121,30 @@ def post_match(
             or (new_match.p1_map_ban and new_match.p1_map_ban in all_maps):
         raise HTTPException(500, detail='Zbanowana mapa nie może być grana ;)')
 
+    should_fail_on_wrong_file = cfg.CAN_FAIL_ON_RECORDING_PARSE and not is_admin
+    has_failing_files = False
+
     recordings = []
     for idx, file in enumerate(recording_files):
+        match_info = None
         try:
             match_info = utils.get_match_info(file.file)
-            recordings.append((file, match_info, recording_times[idx]))
         except:
-            raise HTTPException(500, detail=f"Uszkodzony plik nagrania: {file.filename}")
+            has_failing_files = True
+            if should_fail_on_wrong_file:
+                raise HTTPException(500, detail=f"Uszkodzony plik nagrania: {file.filename}")
+
+        recordings.append((file, match_info, recording_times[idx]))
     recordings.sort(key=lambda r: r[0].filename)
 
-    # check duplicates by map names (but ignore restored matches)
-    map_names = [r[1]['map_name']
-                 for r in recordings if r[1]['start_time_seconds'] <= 5]
-    if len(set(map_names)) > len(recordings):
-        raise HTTPException(500, detail=f'Powtórzono mapy: {", ".join(map_names)}')
+    if not has_failing_files and should_fail_on_wrong_file:
+        # check duplicates by map names (but ignore restored matches)
+        map_names = [r[1]['map_name']
+                     for r in recordings if r[1]['start_time_seconds'] <= 5]
+        if len(set(map_names)) > len(recordings):
+            raise HTTPException(500, detail=f'Powtórzono mapy: {", ".join(map_names)}')
 
-    # verify whether all the given recordings match the maps
-    if not is_admin:
+        # verify whether all the given recordings match the maps
         recordings_maps = [match_info['map_name'] for (_, match_info, _) in recordings]
         result = validate_maps(all_maps, recordings_maps)
         if type(result) == str:
@@ -166,21 +173,28 @@ def post_match(
     saved_files = []
     for i, (file, match_info, mod_time) in enumerate(recordings):
         new_filename = 'rec_match{}_{}'.format(match_id, i)
-        teams = match_info['teams']
         order = i
 
-        db_recording = models.Recording(
-            filename=new_filename,
-            original_filename=file.filename,
-            mod_time=mod_time,
-            map_name=match_info['map_name'],
-            completed=1 if match_info['completed'] else 0,
-            game_version=match_info['game_version'],
-            game_map_type=match_info['game_map_type'],
-            team_count=len(teams),
-            start_time_seconds=match_info['start_time_seconds'],
-            duration_seconds=match_info['duration_seconds']
-        )
+        if match_info:
+            teams = match_info['teams']
+            db_recording = models.Recording(
+                filename=new_filename,
+                original_filename=file.filename,
+                mod_time=mod_time,
+                map_name=match_info['map_name'],
+                completed=1 if match_info['completed'] else 0,
+                game_version=match_info['game_version'],
+                game_map_type=match_info['game_map_type'],
+                team_count=len(teams),
+                start_time_seconds=match_info['start_time_seconds'],
+                duration_seconds=match_info['duration_seconds']
+            )
+        else:
+            db_recording = models.Recording(
+                filename=new_filename,
+                original_filename=file.filename,
+                mod_time=mod_time,
+            )
         db.add(db_recording)
         db.flush()
         db.refresh(db_recording)
@@ -190,24 +204,25 @@ def post_match(
         db.add(db_match_rec_assoc)
         db.flush()
 
-        players = match_info['players']
-        for pi, player in enumerate(players):
-            profile_id = player['user_id']
-            number = player['number']
-            team_index = 0
-            for ti, team in enumerate(teams):
-                if number in team:
-                    team_index = ti
+        if match_info:
+            players = match_info['players']
+            for pi, player in enumerate(players):
+                profile_id = player['user_id']
+                number = player['number']
+                team_index = 0
+                for ti, team in enumerate(teams):
+                    if number in team:
+                        team_index = ti
 
-            db_player_rec_assoc = models.AssocRecordingsPlayers(
-                recording_id=recording_id,
-                profile_id=profile_id,
-                name=player['name'],
-                civ=player['civilization'],
-                team_index=team_index
-            )
-            db.add(db_player_rec_assoc)
-            db.flush()
+                db_player_rec_assoc = models.AssocRecordingsPlayers(
+                    recording_id=recording_id,
+                    profile_id=profile_id,
+                    name=player['name'],
+                    civ=player['civilization'],
+                    team_index=team_index
+                )
+                db.add(db_player_rec_assoc)
+                db.flush()
 
         with open(f'{cfg.RECORDINGS_PATH}/{new_filename}', 'wb') as fp:
             utils.copy_file(file.file, fp)

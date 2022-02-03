@@ -11,7 +11,7 @@ from .utils import as_form
 
 class RecordingOut(BaseModel):
     id: int
-    game_version: str
+    game_version: Optional[str]
 
     class Config:
         orm_mode = True

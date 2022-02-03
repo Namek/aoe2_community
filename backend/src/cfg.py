@@ -12,6 +12,7 @@ ENABLE_DISCORD_BOT = os.getenv('ENABLE_DISCORD_BOT', False) in ["True", "1"]
 # website
 WEBSITE_URL = os.getenv('WEBSITE_URL', '')
 RECORDINGS_PATH = os.getenv('RECORDINGS_PATH', './database/files')
+CAN_FAIL_ON_RECORDING_PARSE = os.getenv('CAN_FAIL_ON_RECORDING_PARSE', '1') == '1'
 CORS_ALLOW_ORIGIN = os.getenv('CORS_ALLOW_ORIGIN')
 STATICS_PATH = os.getenv('STATICS_PATH', '../frontend/dist')
 DB_TEMPLATE_PATH = os.getenv('DB_TEMPLATE_PATH', './database/app.template.db')
@@ -20,6 +21,6 @@ SESSION_SECRET = os.getenv('SESSION_SECRET', ''.join(random.SystemRandom().choic
 
 # discord bot
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
-DISCORD_SERVER_ID = int(os.getenv('DISCORD_SERVER_ID', 0))
+DISCORD_SERVER_ID = int(os.getenv('DISCORD_SERVER_ID', '0'))
 DISCORD_SERVER_CHANNEL_NAMES = (os.getenv('DISCORD_SERVER_CHANNEL_NAMES', '')).split(',')
 DISCORD_BOT_BUGGING_PEOPLE = os.getenv('DISCORD_BOT_BUGGING_PEOPLE', False) in ["True", "1"]
