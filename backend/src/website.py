@@ -15,6 +15,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from . import cfg, crud, models, schemas, utils
 from .database import web_db as get_db
+from .recordings import get_match_info
 from .validation import validate_maps
 
 ROLE_ADMIN = 1
@@ -128,7 +129,7 @@ def post_match(
     for idx, file in enumerate(recording_files):
         match_info = None
         try:
-            match_info = utils.get_match_info(file.file)
+            match_info = get_match_info(file.file)
         except:
             has_failing_files = True
             if should_fail_on_wrong_file:

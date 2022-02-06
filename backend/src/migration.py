@@ -3,6 +3,7 @@ import sqlite3
 import sys
 
 from . import cfg, utils
+from .recordings import get_match_info
 
 # TODO a more automated migration system, based on sqlalchemy and alembic?
 # from .database import get_db, engine
@@ -105,7 +106,7 @@ def ver3(c):
             print(f'Updating recording: {filepath}')
             with open(filepath, 'rb') as file:
                 try:
-                    m = utils.get_match_info(file)
+                    m = get_match_info(file)
                     c.execute('UPDATE recordings SET start_time_seconds=? WHERE id=?', [m['start_time_seconds'], rid])
                     c.execute('UPDATE recordings SET duration_seconds=? WHERE id=?', [m['duration_seconds'], rid])
                 except RuntimeError:
@@ -121,7 +122,7 @@ def ver4(c):
         print(f'Updating recording: {filepath}')
         with open(filepath, 'rb') as file:
             try:
-                m = utils.get_match_info(file)
+                m = get_match_info(file)
                 c.execute('UPDATE recordings SET start_time_seconds=? WHERE id=?', [m['start_time_seconds'], rid])
                 c.execute('UPDATE recordings SET duration_seconds=? WHERE id=?', [m['duration_seconds'], rid])
             except:

@@ -7,7 +7,7 @@ import threading
 
 import uvicorn
 
-from . import cfg, migration, utils
+from . import cfg, recordings as recordings_utils, migration, utils
 
 
 print(f'current dir: {os.getcwd()}')
@@ -24,6 +24,7 @@ if not Path(cfg.DB_PATH).exists():
     exit(1)
 
 migration.migrate(cfg.DB_PATH)
+recordings_utils.retry_recordings_parsing()
 
 for dir in [cfg.RECORDINGS_PATH]:
     try:
