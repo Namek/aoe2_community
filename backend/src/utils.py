@@ -41,6 +41,7 @@ def get_match_info(data):
         )
     except RuntimeError:
         # the `parse_match` method doesn't work for restored recordings, thus, let's try with the `Summary`.
+        data.seek(0)
         s = Summary(data)
 
         return dict(
