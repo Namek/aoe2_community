@@ -1,12 +1,11 @@
 from pathlib import Path
 from re import A
 from sqlalchemy import delete, join, select, update
-from typing import (List)
 
 from mgz.model import parse_match
 from mgz.summary import Summary
 
-from . import cfg, models, utils
+from . import cfg
 from .database import get_db
 from .models import Recording, AssocRecordingsPlayers
 
