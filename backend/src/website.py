@@ -19,6 +19,7 @@ from .recordings import get_match_info
 from .validation import validate_maps
 
 ROLE_ADMIN = 1
+START_TIME_SECONDS_TO_MARK_AS_RESTORE = 5
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=cfg.SESSION_SECRET)
@@ -141,7 +142,7 @@ def post_match(
     if not has_failing_files and should_fail_on_wrong_file:
         # check duplicates by map names (but ignore restored matches)
         map_names = [r[1]['map_name']
-                     for r in recordings if r[1]['start_time_seconds'] <= 5]
+                     for r in recordings if r[1]['start_time_seconds'] <= START_TIME_SECONDS_TO_MARK_AS_RESTORE]
         if len(set(map_names)) > len(recordings):
             raise HTTPException(500, detail=f'Powtórzono mapy: {", ".join(map_names)}')
 
@@ -249,8 +250,10 @@ def get_matches(db: Session = Depends(get_db)):
     # generate fake recordings
     for match in matches:
         n = len(match.recordings)
+        restores_count = len(list(filter(lambda r: r.start_time_seconds >
+                             START_TIME_SECONDS_TO_MARK_AS_RESTORE, match.recordings)))
 
-        while n > 0 and n < match.best_of:
+        while n > 0 and n < (match.best_of + restores_count):
             prev = match.recordings[n - 1]
             newRec = models.Recording(
                 game_version=prev.game_version, id=prev.id + 1)
