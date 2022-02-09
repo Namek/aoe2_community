@@ -36,11 +36,11 @@ component Page.NewMatch {
 
   const MAPS_BLUE =
     [
+      "Atacama",
       "Land Madness",
       "Golden Pit",
-      "Bypass",
-      "Cattails",
-      "Meadow"
+      "Hideout",
+      "Cattails"
     ]
 
   const MAPS_GREEN =
