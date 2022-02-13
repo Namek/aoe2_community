@@ -29,7 +29,7 @@ component Main {
             if (@ENABLE_CALENDAR == "1") {
               <li
                 class={Utils.whenStr(mainTab == MainTab::Calendar, "is-active")}
-                onClick={(evt : Html.Event) { App.setMainTab(MainTab::Calendar) }}>
+                onClick={(evt : Html.Event) { Window.navigate("/#calendar") }}>
 
                 <a>"Kalendarz"</a>
 
@@ -38,7 +38,7 @@ component Main {
 
             <li
               class={Utils.whenStr(mainTab == MainTab::Matches, "is-active")}
-              onClick={(evt : Html.Event) { App.setMainTab(MainTab::Matches) }}>
+              onClick={(evt : Html.Event) { Window.navigate("/#matches") }}>
 
               <a>
                 <span class="icon is-small">
@@ -54,7 +54,7 @@ component Main {
 
             <li
               class={Utils.whenStr(mainTab == MainTab::NewMatch, "is-active")}
-              onClick={(evt : Html.Event) { App.setMainTab(MainTab::NewMatch) }}>
+              onClick={(evt : Html.Event) { Window.navigate("/#new-match") }}>
 
               <a>
                 <span class="icon is-small">

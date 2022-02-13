@@ -271,7 +271,6 @@ component Page.NewMatch {
   fun onSubmit (evt : Html.Event) {
     sequence {
       `#{evt.event}.preventDefault()`
-
       App.setLoading(true)
 
       case (matchForm) {
@@ -352,7 +351,7 @@ component Page.NewMatch {
 
                         `#{form}.reset()`
 
-                        App.setMainTab(MainTab::Matches)
+                        Window.navigate("/#matches")
                       }
                     } else {
                       `alert("Błąd serwera: " + #{response}.status)`
