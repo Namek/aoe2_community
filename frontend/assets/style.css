@@ -10,6 +10,7 @@
   left: 50%;
   transform: translateX(-50%);
   bottom: 100%;
+  z-index: 1;
 }
 
 /* left edge / TODO use that */
@@ -39,7 +40,6 @@
   padding: 10px 6px;
   border-radius: 6px;
   position: absolute;
-  z-index: 1;
 
   visibility: hidden;
 }
