@@ -54,6 +54,13 @@ class CalendarEntry(BaseModel):
     datetime: datetime.datetime
     description: str
     source_id: int
+    spectate_on: Optional[bool]
+    spectate_link: Optional[str]
 
     class Config:
         orm_mode = True
+
+
+class CalendarEntryPatch(BaseModel):
+    spectate_on: Optional[bool]
+    spectate_link: Optional[str]

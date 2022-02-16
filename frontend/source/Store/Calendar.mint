@@ -2,13 +2,28 @@ record Api.CalendarEntry {
   id : Number,
   datetime : Time,
   description : String,
-  sourceId : Number using "source_id"
+  sourceId : Number using "source_id",
+  spectateOn : Maybe(Bool) using "spectate_on",
+  spectateLink : Maybe(String) using "spectate_link"
 }
 
 record Event {
+  id : Number,
   datetime : Time,
   name : String,
-  sourceId : Number
+  sourceId : Number,
+  spectate : SpectateMode
+}
+
+enum SpectateMode {
+  OnChannel(String)
+  Offline
+  Unknown
+}
+
+record EventPatch {
+  spectateOn : Maybe(Bool) using "spectate_on",
+  spectateLink : Maybe(String) using "spectate_link"
 }
 
 store Calendar {
@@ -16,7 +31,6 @@ store Calendar {
   state currentYear = 0
   state currentDay = 0
   state today = Time.today()
-
   state daysData : Map(String, Array(Event)) = Map.empty()
 
   fun init {
@@ -73,9 +87,25 @@ store Calendar {
                     (Map.get(dateKey, acc) or [])
                     |> Array.push(
                       {
+                        id = entry.id,
                         name = entry.description,
                         datetime = entry.datetime,
-                        sourceId = entry.sourceId
+                        sourceId = entry.sourceId,
+                        spectate =
+                          case (entry.spectateOn) {
+                            Maybe::Just(isOn) =>
+                              if (isOn) {
+                                case (entry.spectateLink) {
+                                  Maybe::Just(link) => SpectateMode::OnChannel(link)
+                                  => SpectateMode::Unknown
+                                }
+                              } else {
+                                SpectateMode::Offline
+                              }
+
+                            Maybe::Nothing =>
+                              SpectateMode::Unknown
+                          }
                       })
                     |> Array.sortBy((event : Event) : Number { ` new Date(#{event}.datetime).getHours()` })
 
@@ -87,13 +117,11 @@ store Calendar {
     } catch Http.ErrorResponse => error {
       try {
         Debug.log(error)
-
         Promise.never()
       }
     } catch String => error {
       try {
         Debug.log(error)
-
         Promise.never()
       }
     } finally {
@@ -155,5 +183,33 @@ store Calendar {
 
   fun hashDate (day : Number, month : Number, year : Number) {
     "#{day}-#{month}-#{year}"
+  }
+
+  fun setSpectateMode (
+    eventId : Number,
+    spectateOn : Maybe(Bool),
+    spectateLink : Maybe(String)
+  ) {
+    sequence {
+      patch =
+        {
+          spectateOn = spectateOn,
+          spectateLink = spectateLink
+        }
+
+      response =
+        Http.empty()
+        |> Http.url("#{@ENDPOINT}/api/calendar/#{eventId}")
+        |> Http.method("PATCH")
+        |> Http.withCredentials(true)
+        |> Http.jsonBody(encode patch)
+        |> Http.send()
+
+      Calendar.refreshList()
+    } catch Http.ErrorResponse => error {
+      sequence {
+        `alert("Sromotna klęska: " + JSON.stringify(#{error}))`
+      }
+    }
   }
 }

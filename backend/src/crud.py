@@ -55,6 +55,16 @@ def patch_match(db: DbSession, match_id: int, values: schemas.MatchPatch):
     db.flush()
 
 
+def patch_calendar_entry(db: DbSession, entry_id: int, values: schemas.CalendarEntryPatch):
+    patch = values.dict(exclude_unset=True)
+    db.execute(
+        update(CalendarEntry).
+        where(CalendarEntry.id == entry_id).
+        values(**patch)
+    )
+    db.flush()
+
+
 def get_message_by_original_id(db: DbSession, id: int) -> Message:
     query = select(Message).where(Message.original_id == id).limit(1)
     return db.execute(query).scalars().one_or_none()
@@ -88,7 +98,8 @@ def get_calendar_entries(db: DbSession) -> List[schemas.CalendarEntry]:
         join(Message, CalendarEntry.message_id == Message.id)
 
     result = [
-        schemas.CalendarEntry(id=entry.id, datetime=entry.datetime, description=entry.description, source_id=source_id)
+        schemas.CalendarEntry(id=entry.id, datetime=entry.datetime, description=entry.description,
+                              spectate_on=entry.spectate_on, spectate_link=entry.spectate_link, source_id=source_id)
         for [entry, source_id] in db.execute(query).all()]
 
     return result

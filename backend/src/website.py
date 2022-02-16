@@ -291,6 +291,13 @@ def get_match_recording(match_id: int, rec_id: int, db: Session = Depends(get_db
 def get_calendar_entries(db: Session = Depends(get_db)):
     return crud.get_calendar_entries(db)
 
+
+@app.patch("/api/calendar/{entry_id}")
+def patch_calendar_entry(entry_id: int, patch: schemas.CalendarEntryPatch, db: Session = Depends(get_db), user: models.User = Depends(get_current_admin_user)):
+    crud.patch_calendar_entry(db, entry_id, patch)
+    db.commit()
+
+
 @app.get('/', response_class=FileResponse)
 @app.get('/admin', response_class=FileResponse)
 @app.get('/logout', response_class=FileResponse)

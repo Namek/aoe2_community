@@ -42,6 +42,7 @@ def migrate(db_path):
         block(ctx, ver9)
         block(ctx, ver10)
         block(ctx, ver11)
+        block(ctx, ver12)
 
 
 def block(ctx, fn):
@@ -214,3 +215,8 @@ def ver11(c):
     c.execute('DROP TABLE recordings')
     c.execute('ALTER TABLE recordings__copy RENAME TO recordings')
 
+
+def ver12(c):
+    # tri-state value: enabled, disabled, unknown (default)
+    c.execute('ALTER TABLE calendar ADD "spectate_on" INTEGER DEFAULT NULL;')
+    c.execute('ALTER TABLE calendar ADD "spectate_link" TEXT DEFAULT NULL;')

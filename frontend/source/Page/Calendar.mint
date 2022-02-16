@@ -28,7 +28,7 @@ component Page.Calendar {
     justify-items: center;
     align-items: center;
 
-    * {
+    > * {
       min-width: 100%;
     }
   }
@@ -42,7 +42,7 @@ component Page.Calendar {
     padding: 5px;
     border-bottom: 1px solid black;
     border-right: 1px solid black;
-    overflow: hidden;
+    overflow: visible;
 
     if (isToday) {
       background-color: #6083AE;
@@ -86,6 +86,7 @@ component Page.Calendar {
   }
 
   style event (colorId : Number) {
+    position: relative;
     font-size: 0.8em;
 
     if (colorId == 1) {
@@ -100,11 +101,40 @@ component Page.Calendar {
     margin-bottom: 3px;
     font-weight: normal;
     white-space: pre-wrap;
+    word-break: break-word;
+
+    &:hover {
+      background-color: #547AA0;
+      color: black;
+    }
+
+    a {
+      color: black;
+      text-decoration: underline;
+
+      &:hover {
+        color: #555;
+        text-decoration: none;
+      }
+    }
+  }
+
+  style tooltip {
+    word-break: keep-all;
   }
 
   style eventTime {
+    width: 100%;
     color: #ddd;
     float: left;
+  }
+
+  style channelIcon {
+    position: absolute;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    bottom: calc(50% - 10px);
   }
 
   fun componentDidMount {
@@ -179,15 +209,154 @@ component Page.Calendar {
 
       <div>
         for (evt of events) {
-          <div::event(evt.sourceId)>
+          <div::event(evt.sourceId) class="tooltip-parent">
             <span::eventTime>
               <{ Time.format("HH:mm", evt.datetime) }>
             </span>
 
             "#{evt.name}"
+
+            case (evt.spectate) {
+              SpectateMode::OnChannel(link) =>
+                <div::channelIcon>"🔴"</div>
+
+              SpectateMode::Offline =>
+                <div::channelIcon>"❌"</div>
+
+              => <></>
+            }
+
+            if (App.hasAdminRole) {
+              <div::tooltip class="tooltip">
+                <span class="tooltiptext">
+                  <button onClick={() { toggleSpectateMode(evt) }}>
+                    case (evt.spectate) {
+                      SpectateMode::OnChannel(link) => "🔴"
+                      SpectateMode::Offline => "❌"
+                      SpectateMode::Unknown => "?"
+                    }
+                  </button>
+
+                  case (evt.spectate) {
+                    SpectateMode::OnChannel(link) =>
+                      <>
+                        "Mecz komentowany na żywo:"
+                        <br/>
+
+                        <input as spectateLinkEl
+                          type="text"
+                          placeholder="link"
+                          value={
+                            case (evt.spectate) {
+                              SpectateMode::OnChannel(link) => link
+                              => ""
+                            }
+                          }
+                          onBlur={
+                            () {
+                              case (spectateLinkEl) {
+                                Maybe::Just(el) =>
+                                  sequence {
+                                    oldValue =
+                                      case (evt.spectate) {
+                                        SpectateMode::OnChannel(link) => link
+                                        => ""
+                                      }
+
+                                    `#{el}.value = #{oldValue}`
+                                  }
+
+                                =>
+                                  Promise.never()
+                              }
+                            }
+                          }
+                          onKeyDown={
+                            (keyEvt : Html.Event) {
+                              if (keyEvt.keyCode == 13) {
+                                sequence {
+                                  case (spectateLinkEl) {
+                                    Maybe::Just(el) =>
+                                      saveSpectateLink(evt, `#{el}.value`)
+
+                                    =>
+                                      Promise.never()
+                                  }
+                                }
+                              } else {
+                                Promise.never()
+                              }
+                            }
+                          }/>
+                      </>
+
+                    SpectateMode::Offline =>
+                      <>
+                        "Mecz nie na żywo."
+                        <br/>
+                        "Spectate off."
+                      </>
+
+                    SpectateMode::Unknown =>
+                      <>
+                        "(Nie wiadomo czy będzie online, offline lub komentowany)"
+                      </>
+                  }
+                </span>
+              </div>
+            } else {
+              case (evt.spectate) {
+                SpectateMode::OnChannel(link) =>
+                  <div::tooltip class="tooltip">
+                    <span class="tooltiptext">
+                      "Mecz komentowany na żywo:"
+                      <br/>
+
+                      <a href="#{link}">
+                        "#{link}"
+                      </a>
+                    </span>
+                  </div>
+
+                SpectateMode::Offline =>
+                  <div::tooltip class="tooltip">
+                    <span class="tooltiptext">
+                      "Mecz nie na żywo."
+                      <br/>
+                      "Spectate off."
+                    </span>
+                  </div>
+
+                SpectateMode::Unknown => <></>
+              }
+            }
           </div>
         }
       </div>
     }
+  }
+
+  fun toggleSpectateMode (evt : Event) {
+    sequence {
+      newSpectMode =
+        case (evt.spectate) {
+          SpectateMode::Unknown => Maybe::Just(true)
+          SpectateMode::OnChannel(link) => Maybe::Just(false)
+          SpectateMode::Offline => Maybe::Nothing
+        }
+
+      newSpectLink =
+        if (newSpectMode == Maybe::Just(true)) {
+          Maybe::Just("")
+        } else {
+          Maybe::Nothing
+        }
+
+      Calendar.setSpectateMode(evt.id, newSpectMode, newSpectLink)
+    }
+  }
+
+  fun saveSpectateLink (evt : Event, link : String) {
+    Calendar.setSpectateMode(evt.id, Maybe::Just(true), Maybe::Just(link))
   }
 }

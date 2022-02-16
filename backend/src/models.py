@@ -124,3 +124,5 @@ class CalendarEntry(Base):
     description = Column(String, nullable=False)
     created_at = Column(DateTime, nullable=False, default=dt.now)
     modified_at = Column(DateTime, nullable=False, default=dt.now, onupdate=dt.now)
+    spectate_on = Column(Boolean, nullable=True)
+    spectate_link = Column(String, nullable=True)
