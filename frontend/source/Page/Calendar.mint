@@ -296,9 +296,9 @@ component Page.Calendar {
 
                     SpectateMode::Offline =>
                       <>
-                        "Mecz nie na żywo."
+                        "Mecz offline:"
                         <br/>
-                        "Spectate off."
+                        "Spectators off"
                       </>
 
                     SpectateMode::Unknown =>
