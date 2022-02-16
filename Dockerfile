@@ -1,6 +1,6 @@
 FROM alpine:latest AS build-frontend
 
-ADD https://github.com/mint-lang/mint/releases/download/0.14.0/mint-0.14.0-linux /bin/mint
+ADD https://github.com/mint-lang/mint/releases/download/0.15.2/mint-0.15.2-linux /bin/mint
 RUN chmod +x /bin/mint
 
 WORKDIR /app
