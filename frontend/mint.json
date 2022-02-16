@@ -2,7 +2,7 @@
   "name": "aoe2",
   "application": {
     "head": "assets/head.html",
-    "title": "aoe2",
+    "title": "Ant League",
     "icon": "assets/favicon.png"
   },
   "external": {
