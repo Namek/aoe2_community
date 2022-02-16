@@ -97,7 +97,7 @@ def retry_recordings_parsing():
                         print(f'Update done for: {filepath}')
                         db.commit()
 
-                    except RuntimeError:
+                    except Exception:
                         print(f"Couldn't process {rec.filename}")
             else:
                 print('...but the file does not exist. Ignoring.')
