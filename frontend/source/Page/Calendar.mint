@@ -76,6 +76,10 @@ component Page.Calendar {
     }
   }
 
+  style dayEvents {
+    width: 100%;
+  }
+
   style prev {
     color: #ccc;
   }
@@ -207,7 +211,7 @@ component Page.Calendar {
       events =
         Map.get(hash, Calendar.daysData) or []
 
-      <div>
+      <div::dayEvents>
         for (evt of events) {
           <div::event(evt.sourceId) class="tooltip-parent">
             <span::eventTime>
