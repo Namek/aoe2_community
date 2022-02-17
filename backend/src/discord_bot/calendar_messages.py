@@ -100,7 +100,12 @@ def _analyze_message_content(text: str, message_datetime: datetime) -> ParsedMes
 
     (group, date, time, content) = (None, None, None, text)
     vs = REC_VS.search(text)
-    vs = [vs.group(1), vs.group(2)] if vs else None
+
+    text_for_dates = text
+    if vs:
+        text_for_dates = text.replace(vs.group(), '')
+        vs = [vs.group(1), vs.group(2)]
+
 
     found_groups = []
     print(REC_ANT_GROUP_NAME.findall(text))
@@ -113,7 +118,7 @@ def _analyze_message_content(text: str, message_datetime: datetime) -> ParsedMes
     if len(found_groups) == 2:
         group = f"{found_groups[0]} <-> {found_groups[1]}"
 
-    dt = REC_DATETIME.search(text)
+    dt = REC_DATETIME.search(text_for_dates)
 
     if dt:
         year_str = get_first_val(dt, RE_GROUPS_YEAR)

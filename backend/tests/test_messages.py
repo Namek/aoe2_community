@@ -19,6 +19,12 @@ def test_datetime():
     print(cal.REC_DATETIME.pattern)
 
     cases = [
+        #         ["""Green Ants 2
+        # @Jan  vs @Czerw
+        # 19.02.2022 sobota godz. 20:00""", "19.02.2022 20:00"],
+        ["""blue ants 2
+@vandrarek vs @Hadzik1990 
+20.02.2022 niedziela 17:00""", "20.02.2022 17:00"],
         ["14.07.2021 18:30", "14.07.2021 18:30"],
         ["14.07.2021 r. 18:30", "14.07.2021 18:30"],
         ["14.07.2021   18:30", "14.07.2021 18:30"],
