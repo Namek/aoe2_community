@@ -2,7 +2,12 @@ routes {
   / {
     sequence {
       App.init()
-      Window.navigate("/#calendar")
+
+      if (@ENABLE_CALENDAR == "1") {
+        Window.navigate("/#calendar")
+      } else {
+        Window.navigate("/#matches")
+      }
     }
   }
 
