@@ -109,6 +109,10 @@ component Page.Matches {
                     "👀 Obejrzany"
                   </option>
 
+                  <option value={Number.toString(Matches:WATCH_STATUS_TO_BE_COMMENTED_SOON)}>
+                    "🗣️📢 Komentarz wkrótce"
+                  </option>
+
                   <option value={Number.toString(Matches:WATCH_STATUS_WATCHED_AND_NOTED)}>
                     "📝 Wpisany"
                   </option>
@@ -183,6 +187,10 @@ component Page.Matches {
                   "👀 Obejrzany"
                 </option>
 
+                <option value={Number.toString(Matches:WATCH_STATUS_TO_BE_COMMENTED_SOON)}>
+                  "🗣️📢 Komentarz wkrótce"
+                </option>
+
                 <option value={Number.toString(Matches:WATCH_STATUS_WATCHED_AND_NOTED)}>
                   "📝 Wpisany"
                 </option>
@@ -210,6 +218,7 @@ component Page.Matches {
             case (match.watchStatus) {
               Matches:WATCH_STATUS_WATCHED => "👀 Obejrzany"
               Matches:WATCH_STATUS_WATCHED_AND_NOTED => "📝 Wpisany"
+              Matches:WATCH_STATUS_TO_BE_COMMENTED_SOON => "🗣️📢 Komentarz wkrótce"
               Matches:WATCH_STATUS_COMMENTED => "📺 Skomentowany"
               => ""
             }

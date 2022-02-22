@@ -36,6 +36,7 @@ store Matches {
   const WATCH_STATUS_WATCHED = 1
   const WATCH_STATUS_COMMENTED = 2
   const WATCH_STATUS_WATCHED_AND_NOTED = 3
+  const WATCH_STATUS_TO_BE_COMMENTED_SOON = 4
   state matches : Maybe(Result(String, Array(Match))) = Maybe::Nothing
 
   fun refreshList {

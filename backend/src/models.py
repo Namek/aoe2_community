@@ -20,9 +20,10 @@ class User(Base):
 
 class WatchStatus(enum.IntEnum):
     UNTOUCHED = 0
-    COMMENTED = 1
-    WATCHED = 2
+    WATCHED = 1
+    COMMENTED = 2
     WATCHED_AND_NOTED = 3
+    TO_BE_COMMENTED_SOON = 4
 
     @classmethod
     def values(cls):
