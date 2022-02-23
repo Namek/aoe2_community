@@ -43,6 +43,7 @@ def migrate(db_path):
         block(ctx, ver10)
         block(ctx, ver11)
         block(ctx, ver12)
+        block(ctx, ver13)
 
 
 def block(ctx, fn):
@@ -220,3 +221,17 @@ def ver12(c):
     # tri-state value: enabled, disabled, unknown (default)
     c.execute('ALTER TABLE calendar ADD "spectate_on" INTEGER DEFAULT NULL;')
     c.execute('ALTER TABLE calendar ADD "spectate_link" TEXT DEFAULT NULL;')
+
+
+def ver13(c):
+    c.execute('''
+        CREATE TABLE activity_logs (
+            "id"        INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            "datetime"  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "type"      INTEGER NOT NULL,
+            "table"     TEXT,
+            "item_id"   INTEGER,
+            "user_id"   INTEGER,
+            "details"   TEXT
+        )
+    ''')

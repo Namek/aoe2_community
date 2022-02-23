@@ -30,6 +30,12 @@ class WatchStatus(enum.IntEnum):
         return [m.value for _, m in cls.__members__.items()]
 
 
+class ActivityLogType(enum.IntEnum):
+    NEW_MATCH_UPLOAD_FAIL = 1
+    NEW_MATCH_UPLOAD_SUCCESS = 2
+    DOWNLOAD_RECORDING = 3
+
+
 class Match(Base):
     __tablename__ = "matches"
 
@@ -127,3 +133,15 @@ class CalendarEntry(Base):
     modified_at = Column(DateTime, nullable=False, default=dt.now, onupdate=dt.now)
     spectate_on = Column(Boolean, nullable=True)
     spectate_link = Column(String, nullable=True)
+
+
+class ActivityLog(Base):
+    __tablename__ = 'activity_logs'
+
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    datetime = Column(DateTime, nullable=False, default=dt.now)
+    type = Column(Integer, nullable=False)
+    table = Column(String, nullable=True)
+    item_id = Column(Integer, nullable=True)
+    user_id = Column(ForeignKey('users.id'), primary_key=True)
+    details = Column(String, nullable=True)
