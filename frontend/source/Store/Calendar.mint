@@ -107,7 +107,13 @@ store Calendar {
                               SpectateMode::Unknown
                           }
                       })
-                    |> Array.sortBy((event : Event) : Number { ` new Date(#{event}.datetime).getHours()` })
+                    |> Array.sortBy(
+                      (event : Event) : Number {
+                        ` (() => {
+                            var d = new Date(#{event}.datetime);
+                            return d.getHours()*60 + d.getMinutes();
+                          })()`
+                      })
 
                   acc
                   |> Map.set(dateKey, events)
