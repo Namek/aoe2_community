@@ -154,6 +154,18 @@ component Page.Calendar {
       firstMonthDay =
         Time.from(currentYear, currentMonth, 1)
 
+      todayMonthNum =
+        Time.monthNum(today)
+
+      todayDayNum =
+        Time.dayNum(today)
+
+      todayYear =
+        Time.year(today)
+
+      isTodayYear =
+        currentYear == todayYear
+
       <div::app>
         <div::currentMonth>
           <{ "#{MONTH_NAMES[currentMonth - 1] or ""} #{currentYear}" }>
@@ -177,19 +189,29 @@ component Page.Calendar {
           }
 
           for (day of Calendar.lastDaysFromPreviousMonth(currentMonth, currentYear)) {
-            <div::day(false)::prev>
-              <{ "#{day}" }>
+            try {
+              isToday =
+                day == todayDayNum && currentMonth - 1 == todayMonthNum && isTodayYear
 
-              <{ renderEvents(day, currentMonth - 1, currentYear) }>
-            </div>
+              <div::day(isToday)::prev>
+                <{ "#{day}" }>
+
+                <{ renderEvents(day, currentMonth - 1, currentYear) }>
+              </div>
+            }
           }
 
           for (day of Time.range(firstMonthDay, Time.endOf("month", firstMonthDay))) {
-            <div::day(Time.dayNum(day) == currentDay)>
-              <{ Time.format("d", day) }>
+            try {
+              isToday =
+                Time.dayNum(day) == currentDay && Time.monthNum(day) == todayMonthNum && isTodayYear
 
-              <{ renderEvents(Time.dayNum(day), currentMonth, currentYear) }>
-            </div>
+              <div::day(isToday)>
+                <{ Time.format("d", day) }>
+
+                <{ renderEvents(Time.dayNum(day), currentMonth, currentYear) }>
+              </div>
+            }
           }
         </div>
       </div>
