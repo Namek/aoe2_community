@@ -263,7 +263,7 @@ component Page.Calendar {
 
                         <input as spectateLinkEl
                           type="text"
-                          placeholder="link"
+                          placeholder="linki oddzielone ||"
                           value={
                             case (evt.spectate) {
                               SpectateMode::OnChannel(link) => link
@@ -324,15 +324,18 @@ component Page.Calendar {
               </div>
             } else {
               case (evt.spectate) {
-                SpectateMode::OnChannel(link) =>
+                SpectateMode::OnChannel(links) =>
                   <div::tooltip class="tooltip">
                     <span class="tooltiptext">
                       "Mecz komentowany na żywo:"
                       <br/>
 
-                      <a href="#{link}">
-                        "#{link}"
-                      </a>
+                      for (link of splitLinks(links)) {
+                        <a href="#{link}">
+                          "#{link}"
+                          <br/>
+                        </a>
+                      }
                     </span>
                   </div>
 
@@ -352,6 +355,12 @@ component Page.Calendar {
         }
       </div>
     }
+  }
+
+  fun splitLinks (links : String) : Array(String) {
+    links
+    |> String.split("||")
+    |> Array.map(String.trim)
   }
 
   fun toggleSpectateMode (evt : Event) {
