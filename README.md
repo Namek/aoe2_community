@@ -2,32 +2,36 @@ Website for sharing AoE2 DE recordings of matches. Currently adjusted for the [A
 
 ## Development
 
+Tech stack:
+* Python 3.9
+* [Mint](https://mint-lang.com) 15.2
+
 ### Backend
 
 0. `cd backend`
 
 #### Setup
 
-1. `python -m venv .`
+1. `python3 -m venv .`
 2. `./Scripts/activate`
-3. `python -m pip install -r ./requirements.txt`
+3. `python3 -m pip install -r ./requirements.txt`
 4. `cp ./.env.template ./.env`
 5. edit `.env`: `CORS_ALLOW_ORIGIN=http://127.0.0.1:3000`
 
 #### Develop
 
-1. `./Scripts/activate`
+1. `./Scripts/activate` (Windows) OR `./bin/activate` (Mac/Linux)
 
 2.a) To run the website only and get the auto-restart experience when backend files are modified:
 `uvicorn src.website:app --reload --port 8080`
 
 2.b) To run database migrations (and the Discord bot):
-`python -m main.py`
+`python3 -m main.py`
 
 
 #### Tests
 
-`python -m pytest tests/`
+`python3 -m pytest tests/`
 
 
 ### Frontend
