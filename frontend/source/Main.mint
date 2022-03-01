@@ -71,6 +71,9 @@ component Main {
         </div>
 
         case (mainTab) {
+          MainTab::None =>
+            <></>
+
           MainTab::Calendar =>
             <Page.Calendar/>
 

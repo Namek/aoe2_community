@@ -1,10 +1,5 @@
 store App {
-  state mainTab =
-    if (@ENABLE_CALENDAR == "1") {
-      MainTab::Calendar
-    } else {
-      MainTab::Matches
-    }
+  state mainTab = MainTab::None
 
   state loading = false
   state loggedInUser : Maybe(LoggedInUser) = Maybe::Nothing
@@ -101,7 +96,15 @@ store App {
   }
 
   fun setMainTab (tab : MainTab) {
-    next { mainTab = tab }
+    sequence {
+      next { mainTab = tab }
+
+      if (tab == MainTab::Calendar) {
+        Calendar.init()
+      } else {
+        Promise.never()
+      }
+    }
   }
 
   fun setLoading (enabled : Bool) {
@@ -117,6 +120,7 @@ store App {
 }
 
 enum MainTab {
+  None
   Calendar
   Matches
   NewMatch
