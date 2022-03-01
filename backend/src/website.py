@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, date
 import random
 import re
 import os
@@ -121,6 +121,17 @@ def post_match(
 
     is_admin = int(user.roles) == ROLE_ADMIN
 
+    if not new_match.date:
+        log_upload_fail_and_raise(db, user.id, 'Brak daty.')
+    match_date = datetime.strptime(new_match.date, '%Y-%m-%d').date()
+    date_days_diff = date.today() - match_date
+
+    if date_days_diff.days > 360:
+        log_upload_fail_and_raise(db, user.id, 'Podano datę daleko w przeszłości.')
+    if (-date_days_diff.days) > 2:
+        # 2 days in the future is for not managing timezones
+        log_upload_fail_and_raise(db, user.id, 'Czy graliście w przyszłości? Sprawdź datę.')
+
     if new_match.civ_draft:
         new_match.civ_draft = new_match.civ_draft.replace('https://aoe2cm.net/draft/', '')
 
@@ -176,7 +187,7 @@ def post_match(
 
     db_match = models.Match(**update_dict(
         new_match.dict(),
-        date=int(datetime.datetime.strptime(new_match.date, '%Y-%m-%d').timestamp()),
+        date=int(datetime.strptime(new_match.date, '%Y-%m-%d').timestamp()),
         p0_maps='||'.join(new_match.p0_maps),
         p1_maps='||'.join(new_match.p1_maps),
         p0_civ_bans='||'.join(new_match.p0_civ_bans) if new_match.p0_civ_bans else None,
@@ -293,7 +304,7 @@ def get_matches(db: Session = Depends(get_db)):
 def get_match_recording(match_id: int, rec_id: int, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     match: models.Match = db.query(models.Match).filter(models.Match.id == match_id).first()
     recordings = match.recordings
-    match_date = datetime.datetime.fromtimestamp(match.date).strftime('%Y-%m-%d')
+    match_date = datetime.fromtimestamp(match.date).strftime('%Y-%m-%d')
 
     rec_ = list(filter(lambda r: r.id == rec_id, recordings))[:1]
     if rec_:
