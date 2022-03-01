@@ -34,9 +34,10 @@ store Calendar {
   state daysData : Map(String, Array(Event)) = Map.empty()
 
   fun init {
-    try {
+    sequence {
+      /* Time.today() is bugged with wrong timezones */
       today =
-        Time.today()
+        `new Date(new Date().setHours(0, 0, 0, 0))`
 
       next
         {
