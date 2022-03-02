@@ -261,7 +261,7 @@ component Page.Calendar {
                         "Mecz komentowany na żywo:"
                         <br/>
 
-                        <input as spectateLinkEl
+                        <input
                           type="text"
                           placeholder="linki oddzielone ||"
                           value={
@@ -271,36 +271,22 @@ component Page.Calendar {
                             }
                           }
                           onBlur={
-                            () {
-                              case (spectateLinkEl) {
-                                Maybe::Just(el) =>
-                                  sequence {
-                                    oldValue =
-                                      case (evt.spectate) {
-                                        SpectateMode::OnChannel(link) => link
-                                        => ""
-                                      }
-
-                                    `#{el}.value = #{oldValue}`
+                            (blurEvt : Html.Event) {
+                              try {
+                                oldValue =
+                                  case (evt.spectate) {
+                                    SpectateMode::OnChannel(link) => link
+                                    => ""
                                   }
 
-                                =>
-                                  Promise.never()
+                                `#{blurEvt.target}.value = #{oldValue}`
                               }
                             }
                           }
                           onKeyDown={
                             (keyEvt : Html.Event) {
                               if (keyEvt.keyCode == 13) {
-                                sequence {
-                                  case (spectateLinkEl) {
-                                    Maybe::Just(el) =>
-                                      saveSpectateLink(evt, `#{el}.value`)
-
-                                    =>
-                                      Promise.never()
-                                  }
-                                }
+                                saveSpectateLink(evt, `#{keyEvt.target}.value`)
                               } else {
                                 Promise.never()
                               }
