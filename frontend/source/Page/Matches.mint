@@ -229,7 +229,7 @@ component Page.Matches {
   }
 
   fun renderDraft (match : Match) : Html {
-    <table::draft class="table is-bordered is-narrow is-fullwidth is-striped">
+    <table::draft class="table is-bordered is-narrow is-fullwidth">
       <thead>
         <tr>
           <td>
