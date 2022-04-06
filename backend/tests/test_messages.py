@@ -19,9 +19,9 @@ def test_datetime():
     print(cal.REC_DATETIME.pattern)
 
     cases = [
-        #         ["""Green Ants 2
-        # @Jan  vs @Czerw
-        # 19.02.2022 sobota godz. 20:00""", "19.02.2022 20:00"],
+        ["""Green Ants 2
+        @Jan  vs @Czerw
+        19.02.2022 sobota godz. 20:00""", "19.02.2022 20:00"],
         ["""blue ants 2
 @vandrarek vs @Hadzik1990 
 20.02.2022 niedziela 17:00""", "20.02.2022 17:00"],
@@ -47,6 +47,7 @@ def test_datetime():
         ["25.08 środa 20:00", f"25.08.{today.year} 20:00"],
         ["24.08 wtorek 21:15", f"24.08.{today.year} 21:15"],
         ["2021.08.01 o 20:00", "01.08.2021 20:00"],
+        ["Gold Ants 16.04.2022 Sobota, godzina 20:00 @Barles vs @ElNoniro", "16.04.2022 20:00"],
         # ["18:08 środa 20:00", f'18.08.{today.year} 20:00'],
         # ["15.07.2021 przełożone z godziny 16:15 na 17:10", "15.07.2021 17:10"],
     ]

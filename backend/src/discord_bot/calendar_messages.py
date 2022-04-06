@@ -8,7 +8,9 @@ from dateutil.relativedelta import relativedelta
 ANT_GROUP_NAMES = ['Gold', 'Red', 'Black', 'Blue', 'Green']
 ANT_GROUP_NAMES_SMALL = [name.lower() for name in ANT_GROUP_NAMES]
 REC_ANT_GROUP_NAME = re.compile(r'\b(' + '|'.join(ANT_GROUP_NAMES) + r')\b', re.IGNORECASE)
-REC_VS = re.compile(r'([^\n]+) +vs +([^\n]+)')
+REC_VS_1 = re.compile(r'(@[^\n]+) +vs +([^\n]+)')
+REC_VS_2 = re.compile(r'([^\n]+) +vs +([^\n]+)')
+REC_VS_3 = re.compile(r'([^\n ]+) +vs +([^\n]+)')
 REC_YEAR = re.compile(r'\d\d\d\d')
 RE_DATE_NUMBERED = lambda i: r'(' +\
     rf'(?P<year{i}1>\d\d\d\d).(?P<month{i}1>\d\d).(?P<day{i}1>\d\d?))|' +\
@@ -99,13 +101,18 @@ def _analyze_message_content(text: str, message_datetime: datetime) -> ParsedMes
     message_date = message_datetime.date()
 
     (group, date, time, content) = (None, None, None, text)
-    vs = REC_VS.search(text)
+
+    vs = None
+    vs_match = None
+    for vs_regex in [REC_VS_1, REC_VS_2, REC_VS_3]:
+        vs_match = vs_regex.search(text)
+        if vs_match:
+            vs = [vs_match.group(1), vs_match.group(2)]
+            break
 
     text_for_dates = text
-    if vs:
-        text_for_dates = text.replace(vs.group(), '')
-        vs = [vs.group(1), vs.group(2)]
-
+    if vs and vs_match:
+        text_for_dates = text.replace(vs_match.group(), '')
 
     found_groups = []
     print(REC_ANT_GROUP_NAME.findall(text))
