@@ -8,8 +8,9 @@ Both currently adjusted for the [AoEII ANThology: Ant League 2022 Spring Edition
 ## Development
 
 Tech stack:
-* Python 3.9
-* [Mint](https://mint-lang.com) 15.2
+* website backend: Python 3.9
+* website frontend: [Mint](https://mint-lang.com) 15.2
+* Discord bot: .NET 6.0
 
 ### Backend
 
