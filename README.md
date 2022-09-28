@@ -9,7 +9,7 @@ Both currently adjusted for the [AoEII ANThology: Ant League 2022 Spring Edition
 
 Tech stack:
 * website backend: Python 3.9
-* website frontend: [Mint](https://mint-lang.com) 15.2
+* website frontend: [Mint](https://mint-lang.com) 16.0
 * Discord bot: .NET 6.0
 
 ### Backend
@@ -19,12 +19,12 @@ Tech stack:
 #### Setup
 
 1. `python3 -m venv .`
-2. `./Scripts/activate`
+2. `./Scripts/activate` (Windows) OR `./bin/activate` (Mac/Linux)
 3. `python3 -m pip install -r ./requirements.txt`
 4. `cp ./.env.template ./.env`
 5. edit `.env`: `CORS_ALLOW_ORIGIN=http://127.0.0.1:3000`
 
-#### Develop
+#### Develop the website
 
 1. `./Scripts/activate` (Windows) OR `./bin/activate` (Mac/Linux)
 

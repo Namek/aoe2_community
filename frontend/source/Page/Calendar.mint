@@ -144,7 +144,7 @@ component Page.Calendar {
   fun render : Html {
     try {
       firstMonthDay =
-        Time.from(currentYear, currentMonth, 1)
+        Time.utcDate(currentYear, currentMonth, 1)
 
       todayMonthNum =
         Time.monthNum(today)
@@ -193,13 +193,13 @@ component Page.Calendar {
             }
           }
 
-          for (day of Time.range(firstMonthDay, Time.endOf("month", firstMonthDay))) {
+          for (day of Time.range(firstMonthDay, Time.atEndOfMonth(firstMonthDay))) {
             try {
               isToday =
                 Time.dayNum(day) == currentDay && Time.monthNum(day) == todayMonthNum && isTodayYear
 
               <div::day(isToday)>
-                <{ Time.format("d", day) }>
+                <{ Time.format(Time.Format:ENGLISH, "%-d", day) }>
 
                 <{ renderEvents(Time.dayNum(day), currentMonth, currentYear) }>
               </div>
@@ -229,7 +229,7 @@ component Page.Calendar {
         for (evt of events) {
           <div::event(evt.sourceId) class="tooltip-parent">
             <span::eventTime>
-              <{ Time.format("HH:mm", evt.datetime) }>
+              <{ Time.format(Time.Format:ENGLISH, "%H:%m", evt.datetime) }>
             </span>
 
             "#{evt.name}"

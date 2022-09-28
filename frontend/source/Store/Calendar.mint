@@ -82,7 +82,7 @@ store Calendar {
               ) {
                 try {
                   dateKey =
-                    Number.toString(Time.day(entry.datetime)) + "-" + Number.toString(Time.month(entry.datetime)) + "-" + Number.toString(Time.year(entry.datetime))
+                    Number.toString(Time.dayNum(entry.datetime)) + "-" + Number.toString(Time.monthNumber(entry.datetime)) + "-" + Number.toString(Time.year(entry.datetime))
 
                   events =
                     (Map.get(dateKey, acc) or [])
@@ -139,7 +139,7 @@ store Calendar {
   fun setPrevMonth {
     try {
       newMonth =
-        Time.previousMonth(Time.from(currentYear, currentMonth, 1))
+        Time.previousMonth(Time.utcDate(currentYear, currentMonth, 1))
 
       next
         {
@@ -152,7 +152,7 @@ store Calendar {
   fun setNextMonth {
     try {
       newMonth =
-        Time.nextMonth(Time.from(currentYear, currentMonth, 1))
+        Time.nextMonth(Time.utcDate(currentYear, currentMonth, 1))
 
       next
         {
@@ -169,7 +169,7 @@ store Calendar {
   fun lastDaysFromPreviousMonth (curMonthNumber : Number, year : Number) : Array(Number) {
     try {
       curMonth =
-        Time.from(year, curMonthNumber, 1)
+        Time.utcDate(year, curMonthNumber, 1)
 
       prevMonth =
         Time.previousMonth(curMonth)
@@ -178,7 +178,7 @@ store Calendar {
         daysInMonth(Time.monthNum(prevMonth) - 1, Time.year(prevMonth))
 
       firstDayThisMonth =
-        `#{Time.startOf("month", curMonth)}.getDay()`
+        `#{Time.atBeginningOfMonth(curMonth)}.getDay()`
 
       if (firstDayThisMonth == 1) {
         []
