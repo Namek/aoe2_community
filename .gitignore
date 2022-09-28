@@ -3,10 +3,10 @@
 .vs/
 .vscode/
 
-/database/*.db
-!/database/app.template.db
-/database/files/
-/database/sessions/
+/backend/database/*.db
+!/backend/database/app.template.db
+/backend/database/files/
+/backend/database/sessions/
 /frontend/dist/
 
 discord.log
@@ -32,3 +32,6 @@ obj/
 .fake
 .ionide
 *.csproj.user
+
+# MacOS
+.DS_Store
