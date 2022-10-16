@@ -13,7 +13,7 @@ namespace Bot {
     public class Program {
         public static Task Main(string[] args) {
             Config.CheckMinimalSettings();
-            Database.Database.EnsureMigrationVersion(9);
+            Database.Database.EnsureMigrationVersion(13);
             var hostBuilder = CreateHostBuilder(args);
             return hostBuilder.RunConsoleAsync();
         }

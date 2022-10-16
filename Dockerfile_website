@@ -11,15 +11,15 @@ COPY frontend/source/ ./source
 COPY frontend/.env ./.env
 RUN mint build --env .env --skip-service-worker
 
-FROM python:3.8-slim AS server
+FROM python:3.9-slim AS server
 WORKDIR /app/backend
 COPY backend/.env ./.env
 COPY backend/requirements.txt .
 COPY backend/mgz ./mgz
 RUN pip install -r requirements.txt --no-cache-dir
 COPY --from=build-frontend /app/dist ../frontend/dist/
-COPY database/app.template.db ./database/app.template.db
-# RUN false | cp -i ./database/app.template.db ./database/app.db
+# RUN false | cp -i ./database/app.template.db /app/database/app.db
+COPY database/app.template.db /app/database/app.template.db
 COPY backend/*.py ./
 COPY backend/src/*.py ./src/
 

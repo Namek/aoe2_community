@@ -26,9 +26,10 @@ app.add_middleware(SessionMiddleware, secret_key=cfg.SESSION_SECRET)
 
 
 if cfg.CORS_ALLOW_ORIGIN:
+    print("Enable CORS: " + cfg.CORS_ALLOW_ORIGIN)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[cfg.CORS_ALLOW_ORIGIN or '*'],
+        allow_origins=[cfg.CORS_ALLOW_ORIGIN],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

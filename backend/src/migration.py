@@ -59,8 +59,9 @@ def block(ctx, fn):
             cursor.execute('INSERT INTO migration (version) VALUES (?)', [ctx['version']])
             db.commit()
             print(f"Migration {ctx['block_index'] + 1} committed.")
-        except:
-            print(f"Error migrating from {ctx['version']}:")
+        except Exception as e:
+            print(f"Error migrating from {ctx['version']}:\n")
+            print(e)
             db.rollback()
             sys.exit(1)
 

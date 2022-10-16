@@ -31,7 +31,9 @@ Tech stack:
 2.a) To run the website only and get the auto-restart experience when backend files are modified:
 `uvicorn src.website:app --reload --port 8080`
 
-2.b) To run database migrations (and the Discord bot):
+Note: this does not migrate the database (see `migration.py`)!
+
+2.b) To run the server WITH the database migrations:
 `python3 -m main.py`
 
 
@@ -56,9 +58,13 @@ Tech stack:
 
 ### Discord Bot
 
+0. `cd bot`
+
 #### Setup
 
-TODO
+1. `dotnet restore`
+2. prepare the `bot/Bot/.env` file based on the `bot/Bot/.env.template`
+
 
 #### Develop
 
