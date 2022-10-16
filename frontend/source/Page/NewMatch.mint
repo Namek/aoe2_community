@@ -4,63 +4,65 @@ component Page.NewMatch {
   const MAPS_GOLD =
     [
       "Acclivity",
-      "Enclosed",
-      "Frigid Lake",
-      "Land Madness",
-      "Meadow",
-      "Wade",
+      "Aftermath",
+      "African Waters",
+      "Archipelago",
       "Bypass",
-      "Rockslide"
+      "Chaos Pit",
+      "Haboob",
+      "Le Grand Fosse"
     ]
 
   const MAPS_RED =
     [
       "Acclivity",
-      "Enclosed",
-      "Frigid Lake",
-      "Land Madness",
-      "Meadow",
-      "Wade",
-      "Bypass"
+      "African Waters",
+      "Archipelago",
+      "Bypass",
+      "Chaos Pit",
+      "Haboob",
+      "Le Grand Fosse"
     ]
 
   const MAPS_BLACK =
     [
-      "Enclosed",
-      "Frigid Lake",
-      "Land Madness",
-      "Meadow",
-      "Wade",
-      "Bypass"
+      "African Waters",
+      "Archipelago",
+      "Bypass",
+      "Chaos Pit",
+      "Haboob",
+      "Le Grand Fosse"
     ]
 
   const MAPS_BLUE =
     [
-      "Atacama",
-      "Land Madness",
-      "Golden Pit",
+      "Acclivity",
+      "Cattails",
+      "Chaos Pit",
+      "Haboob",
       "Hideout",
-      "Cattails"
+      "Le Grand Fosse"
     ]
 
   const MAPS_GREEN =
     [
-      "Acropolis",
       "Atacama",
+      "Cattails",
+      "Golden Pit",
       "Hideout",
-      "Gold Rush",
-      "Cattails"
+      "Le Grand Fosse"
     ]
 
   const MAPS_ROTATION =
     [
-      "Gold Rush",
-      "Acropolis"
+      "Bypass",
+      "Meadow"
     ]
 
   const ALL_CIVS =
     [
       "Aztecs",
+      "Bengalis",
       "Berbers",
       "Bohemians",
       "Britons",
@@ -71,12 +73,14 @@ component Page.NewMatch {
       "Celts",
       "Chinese",
       "Cumans",
+      "Dravidians",
       "Ethiopians",
       "Franks",
       "Goths",
+      "Gurjaras",
+      "Hindustani",
       "Huns",
       "Incas",
-      "Indians",
       "Italians",
       "Japanese",
       "Khmer",
