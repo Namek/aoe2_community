@@ -229,7 +229,23 @@ component Page.Calendar {
         for (evt of events) {
           <div::event(evt.sourceId) class="tooltip-parent">
             <span::eventTime>
-              <{ Time.format(Time.Format:ENGLISH, "%H:%m", evt.datetime) }>
+              <{
+                `#{evt.datetime}.getHours()`
+                |> Number.toString()
+                |> String.padLeft("0", 2)
+              }>
+
+              ":"
+
+              <{
+                `#{evt.datetime}.getMinutes()`
+                |> Number.toString()
+                |> String.padLeft("0", 2)
+              }>
+
+              // FIXME the below uses UTC time instead of local time. Note that backend does not send any timezone.
+
+              // <{ Time.format(Time.Format:ENGLISH, "%H:%M", evt.datetime) }>
             </span>
 
             "#{evt.name}"
