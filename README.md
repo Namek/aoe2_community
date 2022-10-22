@@ -29,7 +29,7 @@ Tech stack:
 1. `./Scripts/activate` (Windows) OR `./bin/activate` (Mac/Linux)
 
 2.a) To run the website only and get the auto-restart experience when backend files are modified:
-`uvicorn src.website:app --reload --port 8080`
+`uvicorn src.website:app --reload --port 8081`
 
 Note: this does not migrate the database (see `migration.py`)!
 
