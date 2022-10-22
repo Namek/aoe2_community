@@ -253,14 +253,31 @@ component Page.Matches {
       <tbody>
         if (String.isNotBlank(p0MapBan) || String.isNotBlank(p1MapBan)) {
           <tr>
-            <th>"map ban"</th>
+            <th class="tooltip-parent">
+              "🗺️🚫"
+
+              <div class="tooltip">
+                <span class="tooltiptext">
+                  "map bans"
+                </span>
+              </div>
+            </th>
+
             <td>"#{p0MapBan}"</td>
             <td>"#{p1MapBan}"</td>
           </tr>
         }
 
         <tr>
-          <th>"home mapy"</th>
+          <th class="tooltip-parent">
+            "🗺️🏠"
+
+            <div class="tooltip">
+              <span class="tooltiptext">
+                "home maps"
+              </span>
+            </div>
+          </th>
 
           <td>
             "#{match.p0Maps
@@ -275,7 +292,15 @@ component Page.Matches {
 
         if (!Array.isEmpty(match.p0CivBans)) {
           <tr>
-            <th>"civ bans"</th>
+            <th class="tooltip-parent">
+              "🏘️🚫"
+
+              <div class="tooltip">
+                <span class="tooltiptext">
+                  "civ bans"
+                </span>
+              </div>
+            </th>
 
             <td>
               "#{match.p0CivBans
@@ -315,8 +340,17 @@ component Page.Matches {
   }
 
   style draft {
-    tr > * {
-      width: 33%;
+    td:nth-child(1) {
+      text-align: center;
+      min-width: 50px;
+    }
+
+    tr > *:nth-child(2) {
+      width: 180px;
+    }
+
+    tr > *:nth-child(3) {
+      width: 180px;
     }
   }
 }
