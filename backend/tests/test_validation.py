@@ -8,6 +8,7 @@ def test_map_names():
         [["TidePool"], ["AnT - Tidepool"]],
         [["HC3 - Gold Rush"], ["AnT - Gold Rush"]],
         [["RBW4 - Meadow"], ["AnT - Meadow"]],
+        [["ANT - Bypass"], ["ANT Bypass"]],
     ]
 
     for [official_maps, recordings_maps] in cases:
