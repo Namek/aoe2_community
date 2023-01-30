@@ -3,7 +3,7 @@ component Page.NewMatch {
 
   const MAPS_GOLD =
     [
-      "Acclivity",
+      "Golden Pit",
       "Aftermath",
       "African Waters",
       "Archipelago",
@@ -55,8 +55,8 @@ component Page.NewMatch {
 
   const MAPS_ROTATION =
     [
-      "Bypass",
-      "Meadow"
+      "Golden Pit",
+      "Hideout"
     ]
 
   const ALL_CIVS =
