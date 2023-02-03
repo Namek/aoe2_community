@@ -3,7 +3,12 @@
 1. Website for sharing AoE2 DE recordings of matches.
 2. Discord Bot gathering events from chat and putting those on the website.
 
-Both currently adjusted for the [AoEII ANThology: Ant League 2022 Spring Edition](https://play.toornament.com/pl/tournaments/5304504147050160128/).
+Both currently adjusted for the [AoEII ANThology: Ant League 2023 Winter Edition](https://play.toornament.com/pl/tournaments/6434801951906512896/).
+
+![Matches](/docs/matches.png "Matches uploaded by the players")
+
+![Calendar](/docs/calendar.png "Calendar of the league based on Discord messages")
+
 
 ## Development
 
