@@ -3,54 +3,55 @@ component Page.NewMatch {
 
   const MAPS_GOLD =
     [
+      "Acropolakes",
+      "Coast to Mountain",
+      "Ghost Lake",
+      "Glacier Lagoon",
       "Golden Pit",
-      "Aftermath",
-      "African Waters",
-      "Archipelago",
-      "Bypass",
-      "Chaos Pit",
-      "Haboob",
-      "Le Grand Fosse"
+      "Graveyards",
+      "Ring of Reeds",
+      "Siberian Crater"
     ]
 
   const MAPS_RED =
     [
-      "Acclivity",
-      "African Waters",
-      "Archipelago",
-      "Bypass",
-      "Chaos Pit",
-      "Haboob",
-      "Le Grand Fosse"
+      "Acropolakes",
+      "Coast to Mountain",
+      "Ghost Lake",
+      "Glacier Lagoon",
+      "Golden Pit",
+      "Graveyards",
+      "Ring of Reeds",
+      "Siberian Crater"
     ]
 
   const MAPS_BLACK =
     [
-      "African Waters",
-      "Archipelago",
-      "Bypass",
-      "Chaos Pit",
-      "Haboob",
-      "Le Grand Fosse"
+      "Acropolakes",
+      "Ghost Lake",
+      "Glacier Lagoon",
+      "Graveyards",
+      "Ring of Reeds",
+      "Siberian Crater"
     ]
 
   const MAPS_BLUE =
     [
-      "Acclivity",
+      "Acropolakes",
       "Cattails",
-      "Chaos Pit",
-      "Haboob",
-      "Hideout",
-      "Le Grand Fosse"
+      "Ghost Lake",
+      "Graveyards",
+      "Glacier Lagoon",
+      "Siberian Crater"
     ]
 
   const MAPS_GREEN =
     [
-      "Atacama",
-      "Cattails",
+      "Acropolis",
       "Golden Pit",
       "Hideout",
-      "Le Grand Fosse"
+      "Siberian Crater",
+      "Socotra"
     ]
 
   const MAPS_ROTATION =
