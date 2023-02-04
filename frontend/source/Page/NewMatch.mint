@@ -48,6 +48,7 @@ component Page.NewMatch {
   const MAPS_GREEN =
     [
       "Acropolis",
+      "Cattails",
       "Golden Pit",
       "Hideout",
       "Siberian Crater",
