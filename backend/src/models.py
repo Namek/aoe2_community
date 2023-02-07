@@ -49,7 +49,7 @@ class Match(Base):
     p1_name = Column(String)
     p1_map_ban = Column(String)
     p1_maps = Column(String)
-    upload_user_id = Column(Integer, nullable=False)
+    upload_user_id = Column(ForeignKey('users.id'), nullable=False)
     best_of = Column(Integer)
     p0_civ_bans = Column(String)
     p1_civ_bans = Column(String)
@@ -92,7 +92,7 @@ class AssocRecordingsPlayers(Base):
     __tablename__ = 'recordings_players'
 
     recording_id = Column(ForeignKey('recordings.id'), primary_key=True)
-    profile_id = Column(ForeignKey('users.id'), primary_key=True)
+    profile_id = Column(Integer)
     name = Column(String, nullable=False)
     civ = Column(String, nullable=False)
     team_index = Column(Integer, nullable=False)
@@ -143,5 +143,5 @@ class ActivityLog(Base):
     type = Column(Integer, nullable=False)
     table = Column(String, nullable=True)
     item_id = Column(Integer, nullable=True)
-    user_id = Column(ForeignKey('users.id'), primary_key=True)
+    user_id = Column(ForeignKey('users.id'), nullable=True)
     details = Column(String, nullable=True)
