@@ -8,12 +8,12 @@ from .database import DbSession
 
 def get_user(db: DbSession, user_id: int):
     query = select(User).where(User.id == user_id).limit(1)
-    return db.execute(query).scalars().one()
+    return db.execute(query).scalars().one_or_none()
 
 
 def get_user_by_password(db: DbSession, password: str) -> User:
     query = select(User).where(User.password == password).limit(1)
-    return db.execute(query).scalars().one()
+    return db.execute(query).scalars().one_or_none()
 
 
 def create_match(db: DbSession, match: schemas.MatchIn, upload_user_id: int):
@@ -39,7 +39,7 @@ def get_matches(db: DbSession) -> List[schemas.MatchOut]:
 
 def get_match(db: DbSession, id: int) -> Match:
     query = select(Match).where(Match.id == id).limit(1)
-    return db.execute(query).scalars().one()
+    return db.execute(query).scalars().one_or_none()
 
 
 def patch_match(db: DbSession, match_id: int, values: schemas.MatchPatch):
