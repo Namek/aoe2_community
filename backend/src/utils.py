@@ -18,6 +18,13 @@ def copy_file(source_file, dest_file, chunk_size=2 ** 16):
     source_file.seek(offset)
 
 
+def get_file_size(file):
+    file.seek(0, 2)
+    size = file.tell()
+    file.seek(0)
+    return size
+
+
 def as_form(cls: Type[BaseModel]):
     """
     Adds an as_form class method to decorated models. The as_form class method

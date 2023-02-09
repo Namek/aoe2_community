@@ -141,12 +141,13 @@ def post_match(
         if len(set(new_match.p0_civ_bans)) != len(new_match.p0_civ_bans) or len(set(new_match.p1_civ_bans)) != len(new_match.p1_civ_bans):
             log_upload_fail_and_raise(db, user.id, "Powtórzone bany cywilizacji")
 
-    # frontend may sent empty file
+    # frontend may have sent an empty file, filter it out
     recording_files = [file for file in recording_files if file.filename]
+    recording_files_sizes = list(set([utils.get_file_size(file.file) for file in recording_files]))
 
-    # check if there are no duplicates by filenames
-    if len(set([file.filename for idx, file in enumerate(recording_files)])) != len(recording_files):
-        log_upload_fail_and_raise(db, user.id, "Duplikaty plików")
+    # check if there are no duplicates by file names and file sizes
+    if len(set([file.filename for idx, file in enumerate(recording_files)])) != len(recording_files) or len(recording_files_sizes) != len(recording_files):
+        log_upload_fail_and_raise(db, user.id, "Wykryto duplikaty plików. Jeśli zagraliście mniej gier to nie ma potrzeby wrzucania sztucznych nagrań, strona sama je wygeneruje.")
 
     all_maps = new_match.p0_maps + new_match.p1_maps
 
