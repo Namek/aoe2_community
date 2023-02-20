@@ -38,11 +38,16 @@ component Page.NewMatch {
   const MAPS_BLUE =
     [
       "Acropolakes",
+      "Acropolis",
       "Cattails",
+      "Crater",
       "Ghost Lake",
       "Graveyards",
       "Glacier Lagoon",
-      "Siberian Crater"
+      "Haboob",
+      "Mediterranen",
+      "Nomad",
+      "Siberian Crater",
     ]
 
   const MAPS_GREEN =
